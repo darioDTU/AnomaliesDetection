@@ -10,7 +10,7 @@ jobs:
   push-store-image:
     runs-on: ubuntu-latest
     steps:
-      - uses: action/checkout@main
+      - uses: action/checkout@v3
       - name: Build and pudh the Image
         run: |
           docker login --username darioDTU --password ${{secrets.GH_PAT}} ghcr.io
