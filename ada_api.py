@@ -60,7 +60,7 @@ async def run_pipeline_pot():
 async def run_pipeline_classic():
     output = xr.load_dataarray("output_array.nc")
     da6d, climatology = ClimatologyCalculation(output)
-    threshold = ProcessAnomalies(da6d, climatology, 0)
+    threshold = ProcessAnomalies(da6d, climatology, 1)
     mask, coords = DetectAnomalies(da6d, threshold)
     coords_anomalies = APIHelper().get_coordinate_list(da6d = da6d, coords = coords)
     return {
