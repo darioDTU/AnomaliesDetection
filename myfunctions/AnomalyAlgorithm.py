@@ -3,44 +3,33 @@ import xarray as xr
 from scipy import stats
 from collections import deque
 import matplotlib.pyplot as plt
+import pandas as pd
 from bokeh.models import FixedTicker
 from bokeh.io import output_notebook
 from bokeh.plotting import figure, show
 from myfunctions.coordinates_values import *
 
-def ClimatologyCalculation(input_array, all_years=all_years, periodicity=periodicity):
-    # pick your time‐axis length & name
-    if periodicity == 'monthly':
-        n_t = 12
-        tdim = 'month'
-    else:
-        n_t = 52
-        tdim = 'week'
+def ClimatologyCalculation(baseline, dataset):
 
-    # reshape into (year, month/week, lon, lat, depth, var)
-    arr = input_array.values.reshape(len(all_years), n_t, *input_array.shape[1:])
-    da6d = xr.DataArray(
-        arr,
-        dims=('year', tdim) + input_array.dims[1:],
-        coords={
-            'year': all_years,
-            tdim: np.arange(1, n_t+1),
-            **{d: input_array.coords[d] for d in input_array.dims[1:]}
-        }
-    )
+    # compute the mean across the 'time' dimension
+    climatology = baseline.groupby("time.month").mean("time", skipna=True)
+    climatology = climatology.squeeze()
+    climatology = climatology['thetao']
+    da4d = dataset['thetao']
 
-    # compute the mean across the 'year' dimension
-    climatology = da6d.mean(dim='year', skipna=True)
-    climatology = climatology.expand_dims('year')
-    climatology = climatology.assign_coords(year=['climatology'])
+    return da4d, climatology
 
-    return da6d, climatology
-
-def AnomalyDetection(data, climatology):
-    clim0 = climatology.isel(year=0, drop=True)
-    deviation = data - clim0
-    vals = deviation.values.ravel()
-    valid = vals[np.isfinite(vals)]
+def AnomalyDetection(da4d, climatology):
+    # clim0 = climatology.isel(year=0, drop=True)½
+    # climatology = climatology.assign_coords(month=climatology['month'].astype(int))
+    # climatology = climatology.to_array(dim='var')
+    # data = data.to_array(dim='var')
+    data_grouped = da4d.groupby("time.month").mean()
+    deviation = data_grouped - climatology
+    # deviation = clim0 #TODO put deviation here if there are multiple years
+    vals = deviation.load()  
+    vals_array = abs(vals.data)
+    valid = vals_array[np.isfinite(vals_array)]
 
     if valid.size == 0:
         raise ValueError("No finite deviations found! Check your data/climatology overlap.")
@@ -48,7 +37,8 @@ def AnomalyDetection(data, climatology):
     mask = deviation >= threshold
     anomalies = deviation.where(mask)
 
-    return deviation, threshold
+    threshold_array = climatology + threshold
+    return deviation, threshold_array
 
 def POT(X, q=0.01, t=None, t_pct=percentile/100):
     """
@@ -149,7 +139,7 @@ def DSPOT(X, d, n=5000, q=0.01):
 
     return anomalies, zq, t
 
-def ProcessAnomalies(array, climatology, res):
+def ProcessAnomalies(da6d, climatology, res):
     # algorithms = ['Classic', 'POT', 'DSPOT']
     # print("Select anomaly processing:")
     # for idx, name in enumerate(algorithms):
@@ -164,15 +154,16 @@ def ProcessAnomalies(array, climatology, res):
 
     threshold = None
     if res == 0:
-        _, threshold = AnomalyDetection(array, climatology)
+        _, threshold = AnomalyDetection(da6d, climatology)
     elif res == 1:
+        climatology = climatology.to_array(dim='var')
         threshold, _ = POT(climatology)
     else:
         _, threshold, _ = DSPOT(X=climatology, d=max_depth)
 
     return threshold
 
-def DetectAnomalies(deviation, zq):
+def DetectAnomalies(da6d, threshold):
     """
     Flags all entries in the deviation array that exceed threshold zq
     
@@ -183,11 +174,11 @@ def DetectAnomalies(deviation, zq):
         -> mask : array same shape as deviation with True when deviation > zq
         -> coords : array like (n_anomalies, ndim) with coordinates of all anomalies
     """
-    arr = np.asarray(deviation)
-    mask = arr > zq
+    # arr = np.asarray(da6d)
+    mask = da6d > threshold
     coords = np.argwhere(mask)
 
-    print(f"Found {coords.shape[0]} anomalies out of {deviation.size} total points.")
+    print(f"Found {coords.shape[0]} anomalies out of {da6d.size} total points.")
 
     return mask, coords   
 
@@ -312,7 +303,7 @@ def ShowGraphAnomaly(da6d, mask, threshold, var_index):
     point_mask = mask_da.sel(dim_2=user_lon, dim_1=user_lat, method='nearest')
 
     # pick surface & variable
-    raw_pixel  = point_da  .isel(dim_3=depth_k, dim_4=var_idx)   # (year,month)
+    raw_pixel  = point_da .isel(dim_3=depth_k, dim_4=var_idx)   # (year,month)
     pixel_mask = point_mask.isel(dim_3=depth_k, dim_4=var_idx)  # (year,month)
 
     # flatten to 1-D
@@ -368,3 +359,133 @@ def ShowGraphAnomaly(da6d, mask, threshold, var_index):
     p.legend.location = "top_left"
 
     show(p)
+
+def showClimatology(climatology):
+    lat_c = (min_latitude + max_latitude) / 2
+    lon_c = (min_longitude + max_longitude) / 2
+    
+    climatology = climatology.sel(latitude = lat_c, longitude = lon_c, method="nearest")
+    climatology = climatology.sortby('month')
+    baseline = climatology.values.flatten()
+    xticks = climatology['month']
+    
+    plt.plot(xticks, baseline, '--r', label = "Baseline", color = "black" )
+    plt.title("baseline plot")
+    plt.xlabel("Time")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.show()
+
+def showGraph(da4d, threshold):
+    plt.clf()
+    
+    da3d = da4d.isel(depth=0, drop=True)
+    da1d = da3d.mean(dim=('latitude','longitude'))
+    da1d['time'] = da1d['time'].dt.dayofyear
+    
+    threshold = threshold.mean(dim=('latitude','longitude'))
+    mid_month_day = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349]
+    daily_days = np.arange(1, 366)
+    day_coord = xr.DataArray(mid_month_day, dims="month", coords={"month": np.arange(1, 13)})
+    threshold = threshold.assign_coords(time = day_coord)
+    threshold = threshold.drop_vars('month')
+    threshold = threshold.rename({"month": "time"})
+    threshold = threshold.interp(time = daily_days)
+
+    da1d.to_netcdf("results/da1d.nc")
+    threshold.to_netcdf("results/threshold.nc")
+
+    da1d.plot(label = 'Variable')
+    threshold.plot(label = 'Threshold', linestyle = '--')
+    # plt.plot(xticks, var, label = "Raw Value", color = "blue")
+    # plt.plot(xticks, threshold, '--r', label = "Baseline", color = "black" )
+    # plt.plot(xticks, [threshold]*len(xticks), '--r', label = 'Threshold')
+    plt.grid(True)
+    
+    plt.title(f"Anomaly Detection for ")
+    plt.xlabel("Time")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('results/anomaly_plot.png')
+    plt.close()
+    
+def ShowGraphAnomalyv2(da6d, mask, threshold, var_index, user_lon, user_lat):
+
+    # creation of list containing all longitude and latitude, same size as each lon/lat in da6d
+    # this is a more "user-friendly" way to enter coordinate since in da6d the coordinates are not in degres
+    #lon_vals = np.arange(min_longitude,max_longitude + area_resolution/2,area_resolution)
+    #lat_vals = np.arange(min_latitude,max_latitude + area_resolution/2,area_resolution)
+
+    # user_lon = float(input("Enter longitude (Array Index): "))
+    # user_lat = float(input("Enter latitude  (Array Index): "))
+
+    # take the closest value from the list
+    #user_lon = np.abs(lon_vals - user_lon).argmin()
+    #user_lat = np.abs(lat_vals - user_lat).argmin()
+
+    depth_k = 0
+    var_idx = var_index
+
+    # creation of list containing all longitude and latitude, same size as each lon/lat in da6d
+    # this is a more "user-friendly" way to enter coordinate since in da6d the coordinates are not in degres
+    #desti_lon = list(range(min_longitude, max_longitude, len(da6d[0,0,:,0,0,0])))
+    #desti_lat = list(range(max_latitude, min_latitude, -len(da6d[0,0,:,0,0,0])))
+
+    # take the closest value from the list
+    #lon = min(desti_lon, key=lambda x:abs(x--user_lon))
+    #lat = min(desti_lat, key=lambda x:abs(x--user_lat))
+
+    mask_da = xr.DataArray(
+        mask,
+        dims=da6d.dims,
+        coords=da6d.coords,
+        name="anomaly_mask"
+    )
+
+    # -------- pick the nearest grid-cell by real lon/lat --------
+    point_da   = da6d.sel(  dim_2=user_lon, dim_1=user_lat, method='nearest' )
+    point_mask = mask_da.sel(dim_2=user_lon, dim_1=user_lat, method='nearest')
+
+    # pick surface & variable
+    raw_pixel  = point_da.isel(dim_3=depth_k, dim_4=var_idx)   # (year,month)
+    pixel_mask = point_mask.isel(dim_3=depth_k, dim_4=var_idx)  # (year,month)
+
+    # flatten to 1-D
+
+    ts   = raw_pixel.values.flatten()
+    flag = pixel_mask.values.flatten().astype(bool)
+
+    print("flag:", flag, "   sum:", flag.sum())  # should now show exactly 2
+
+    # build baseline
+    baseline12 = raw_pixel.mean(dim='month', skipna=True).values
+    baseline   = np.tile(baseline12, raw_pixel.sizes['month'])
+    ts_interp = pd.Series(ts).interpolate(method='linear').values
+
+    # build x & xticks (unchanged)...
+    # then draw the vbar shading etc.
+
+    n_years    = raw_pixel.sizes['year']
+    x          = np.arange(1, ts.size+1)
+    years      = da6d.year.values
+    if periodicity == 'monthly':
+        n_months   = raw_pixel.sizes['month']
+    else:
+        n_months   = raw_pixel.sizes['week']
+    xticks     = [f"{y}-{m:02d}" for y in years for m in range(1,n_months+1)]
+
+    # 5) Plot, with vbar for shading
+    plt.figure(figsize=(12,5))
+    
+    plt.plot(xticks, ts_interp, label = "Raw Value", color = "blue")
+    plt.plot(xticks, baseline, '--r', label = "Baseline", color = "black" )
+    plt.plot(xticks, [threshold]*len(xticks), '--r', label = 'Threshold')
+    plt.grid(True)
+
+    plt.title(f"Anomaly Detection for {variable[var_index]}")
+    plt.xlabel("Time")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()

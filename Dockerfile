@@ -11,6 +11,7 @@ RUN pip install bokeh==3.7.3
 RUN pip install argopy==1.2.0
 RUN pip install uvicorn==0.34.3
 RUN pip install fastapi==0.115.12
+RUN pip install copernicusmarine==2.2.2
 
 COPY . /app
 

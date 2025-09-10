@@ -29,7 +29,7 @@ class AlgoPy():
         self.ending_time = ending_time
         self.min_depth = min_depth
         self.max_depth = max_depth
-        self.dataset = dataset
+        self.dataset = dataset_argo
 
     def ExtractData(self, heatmap=0):
         """
@@ -50,7 +50,7 @@ class AlgoPy():
             DataFrame containing datas for the specified inputs
         """
         try:
-            if dataset == 'erddap':
+            if dataset_argo == 'erddap':
                 argopy.set_options(mode='expert', ds='bgc')
                 fetcher = DataFetcher(src=self.dataset, mode='expert').region([self.min_longitude, self.max_longitude, self.min_latitude, self.max_latitude, self.min_depth, self.max_depth, self.starting_time, self.ending_time]).to_xarray()
             else:
