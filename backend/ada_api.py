@@ -7,13 +7,13 @@ import pandas as pd
 from pydantic import BaseModel
 import xarray as xr
 # from dask.distributed import Client
-from myfunctions.AnomalyAlgorithm import ClimatologyCalculation, DetectAnomalies, ProcessAnomalies, showClimatology, ShowGraphAnomalyv2, ShowPixelAnomalies, showGraph
+from myfunctions.AnomalyAlgorithm import AnomaliesCalculation
 from myfunctions.coordinates_values import *
 from myfunctions.AlgoPy import AlgoPy
 from myfunctions.fetcher import CopernicusFetcher
 
 xr.set_options(keep_attrs=True, display_expand_data=False)
-# client = Client(n_workers=2, threads_per_worker=2, memory_limit='1GB')
+
 class APIHelper:
     
     '''API Helper class.'''
@@ -68,6 +68,7 @@ class APIHelper:
 class PipelineParams(BaseModel):
     dataset: str
     starting_time: str
+    variable : str
 
 app = FastAPI()
 
@@ -110,19 +111,24 @@ async def run_pipeline_pot():
 async def run_pipeline_classic(params : PipelineParams):
     
     dataset = params.dataset
-    starting_time = params.starting_time
+    starting_time = f"01/01/{params.starting_time}"
+    ending_time = f"31/12/{params.starting_time}"
+    variable = params.variable
 
-    output = CopernicusFetcher().fetch_temperature(dataset, starting_time)
+    
+    anomalies_class = AnomaliesCalculation(starting_time, dataset, 95)
+
+    output = CopernicusFetcher().fetch_temperature(dataset, starting_time, ending_time, variable)
     climatology = xr.open_dataarray("climatology.nc")
-    da4d = output['thetao']
-    threshold = ProcessAnomalies(da4d, climatology, 0)
-    showGraph(da4d, threshold)
+    da4d = output[variable]
+    threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
+    anomalies_class.showGraph(da4d, threshold_array, threshold_value)
     return {
         "Status": "ok"}
 
 @app.get("/show_image")
 async def show_image():
-    return FileResponse("results/anomaly_plot.png", media_type="image/png")
+    return FileResponse("results/plot.png", media_type="image/png")
 
 @app.get("/get_stats")
 async def get_stats():
@@ -156,10 +162,10 @@ async def get_stats():
 # ShowPixelAnomalies(mask, 0)
 # ShowGraphAnomalyv2(da6d, mask, threshold, 0, user_lon = 30, user_lat = 25)
 
-dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m'
-starting_time = '01/01/2023'
-output = CopernicusFetcher().fetch_temperature(dataset, starting_time)
-climatology = xr.open_dataarray("climatology.nc")
-da4d = output['thetao']
-threshold = ProcessAnomalies(da4d, climatology, 0)
-showGraph(da4d, threshold)
+# dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m'
+# starting_time = '01/01/2023'
+# output = CopernicusFetcher().fetch_temperature(dataset, starting_time)
+# climatology = xr.open_dataarray("climatology.nc")
+# da4d = output['thetao']
+# threshold = ProcessAnomalies(da4d, climatology, 0)
+# showGraph(da4d, threshold)

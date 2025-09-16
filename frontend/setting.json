@@ -1,0 +1,33 @@
+    { 
+     "editor.fontSize": 14, 
+     "editor.lineHeight": 25, 
+     "editor.formatOnSave": true, 
+     "editor.folding": true, 
+     "prettier.printWidth": 80, 
+     "prettier.jsxBracketSameLine": true, 
+     "editor.tabSize": 2, 
+     "editor.foldingStrategy": "indentation", 
+     "[javascriptreact]": { 
+     "editor.defaultFormatter": "remimarsal.prettier-now" 
+     }, 
+     // To exclude from view 
+     "files.exclude": { 
+     "**/.git": true 
+     }, 
+     // To dont watch 
+     "files.watcherExclude": { 
+     "**/.git/objects/**": true, 
+     "**/.git/subtree-cache/**": true, 
+     "**/node_modules/*/**": true, 
+     "**/dist": true 
+     } 
+     // To change bar color 
+     // "workbench.colorCustomizations": { 
+     // "titleBar.activeBackground": "#7325d6", 
+     // "titleBar.inactiveBackground": "#7325d6", 
+     // "titleBar.activeForeground": "#ffffff", 
+     // "titleBar.inactiveForeground": "#ffffff", 
+     // "statusBar.background": "#7325d6", 
+     // "statusBar.foreground": "#ffffff" 
+     // } 
+    }

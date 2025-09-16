@@ -1,0 +1,35 @@
+.api-font {
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 1rem;
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+  color: #222;
+  overflow-x: auto;
+}
+
+.api-result {
+  margin-top: 24px;
+}
+
+.api-extra {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  align-items: flex-start;
+}
+
+.api-image {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.12);
+}
+
+.api-stats {
+  background: #eef2ff;
+  padding: 16px;
+  border-radius: 8px;
+  min-width: 120px;
+  margin-left: 50px;
+}
