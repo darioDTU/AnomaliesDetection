@@ -15,4 +15,4 @@ RUN pip install copernicusmarine==2.2.2
 
 COPY . /app
 
-CMD ["uvicorn", "ada_api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "ada_api:app", "--host", "0.0.0.0", "--port", "80"]
