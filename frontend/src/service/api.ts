@@ -1,5 +1,5 @@
 // const API_KEY = 'API_KEY'
-export const BASE_URL = 'http://localhost:8000';
+export const BASE_URL = '/api';
 
 
 export interface PipelineRequest {
