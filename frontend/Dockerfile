@@ -23,10 +23,10 @@ FROM nginx:stable-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom nginx.conf into container
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # 9. Expose port 80
-EXPOSE 8000
+EXPOSE 80
 
 # 10. Start nginx
 CMD ["nginx", "-g", "daemon off;"]
