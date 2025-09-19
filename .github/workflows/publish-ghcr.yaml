@@ -15,9 +15,9 @@ jobs:
         run: |
           docker login --username darioDTU --password ${{secrets.GH_PAT}} ghcr.io
           docker build -f backend/Dockerfile backend -t ghcr.io/dariodtu/anomalies_detection:latest
-          docker push ghcr.io/dariodtu/anomalies_detection:latest
+          docker push ghcr.io/dariodtu/anomalies_detection:1.0.0
 
       - name: Build and push frontend image
         run: |
           docker build -f frontend/Dockerfile frontend -t ghcr.io/dariodtu/anomalies_detection_frontend:latest
-          docker push ghcr.io/dariodtu/anomalies_detection_frontend:latest
+          docker push ghcr.io/dariodtu/anomalies_detection_frontend:1.0.0
