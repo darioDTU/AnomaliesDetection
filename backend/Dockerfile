@@ -15,4 +15,7 @@ RUN pip install copernicusmarine==2.2.2
 
 COPY . /app
 
+COPY climatology.nc /app/
+COPY results/ /app/results/
+
 CMD ["uvicorn", "ada_api:app", "--host", "0.0.0.0", "--port", "80"]
