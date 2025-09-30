@@ -17,6 +17,4 @@ RUN pip install "xarray==2023.12.0" "zarr<3"
 
 COPY . /app
 
-COPY climatology.nc /app/
-
 CMD ["uvicorn", "ada_api:app", "--host", "0.0.0.0", "--port", "80"]

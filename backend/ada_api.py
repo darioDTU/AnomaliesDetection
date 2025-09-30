@@ -69,10 +69,8 @@ class PipelineParams(BaseModel):
     dataset: str
     starting_time: str
     variable : str
-    min_latitude: float
-    max_latitude: float
-    min_longitude: float
-    max_longitude: float
+    latitude: float
+    longitude: float
 
 app = FastAPI(root_path="/api")
 
@@ -116,10 +114,10 @@ async def run_pipeline_classic(params : PipelineParams):
     starting_time = f"01/01/{params.starting_time}"
     ending_time = f"31/12/{params.starting_time}"
     variable = params.variable
-    min_latitude = params.min_latitude
-    max_latitude = params.max_latitude
-    min_longitude = params.min_longitude
-    max_longitude = params.max_longitude  
+    min_latitude = params.latitude
+    max_latitude = min_latitude + 5
+    min_longitude = params.longitude
+    max_longitude = min_longitude + 5
     
     anomalies_class = AnomaliesCalculation(starting_time, dataset, 95)
 
