@@ -20,12 +20,16 @@ class AnomaliesCalculation:
         self.starting_time = starting_time
         self.dataset = dataset
         self.percentile = percentile
-    def ClimatologyCalculation(self, baseline, dataset):
+    def ClimatologyCalculation(self, baseline, dataset, variable='thetao'):
         # compute the mean across the 'time' dimension
         climatology = baseline.groupby("time.month").mean("time", skipna=True)
-        climatology = climatology.squeeze()
-        climatology = climatology['thetao']
-        da4d = dataset['thetao']
+        # climatology = climatology.squeeze()
+        climatology = climatology[variable]
+        da4d = dataset[variable]
+        print("heree")
+        print(climatology)
+        print(da4d)
+        climatology.to_netcdf("climatology.nc")
 
         return da4d, climatology
 
@@ -43,7 +47,6 @@ class AnomaliesCalculation:
         vals = deviation.load()  
         vals_array = abs(vals.data)
         valid = vals_array[np.isfinite(vals_array)]
-
         if valid.size == 0:
             raise ValueError("No finite deviations found! Check your data/climatology overlap.")
         threshold_value = float(np.nanpercentile(valid, self.percentile))
@@ -208,6 +211,7 @@ class AnomaliesCalculation:
         da1d = da3d.mean(dim=('latitude','longitude'))
         da1d['time'] = da1d['time'].dt.dayofyear
         
+        threshold = threshold.isel(depth=0, drop=True)
         threshold = threshold.mean(dim=('latitude','longitude'))
         mid_month_day = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349]
         extended_days = np.concatenate(([mid_month_day[-1] - 365], mid_month_day, [mid_month_day[0] + 365]))

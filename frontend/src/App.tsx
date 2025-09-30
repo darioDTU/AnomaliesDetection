@@ -1,10 +1,18 @@
 import './css/Dashboard.css'
 import './css/Api.css'
 import {ENDPOINTS} from './service/endpoints.ts'
-import {BASE_URL,fetchData, postData,type PipelineRequest} from './service/api.ts'
+import {BASE_URL,fetchData, postData} from './service/api.ts'
 import Map from './components/Map.tsx'
 import Sidebar from './components/Sidebar.tsx';
 import { useState } from 'react'
+
+export type PipelineRequest = {
+  dataset: string;
+  starting_time: string;
+  variable: string;
+  latitude: number;
+  longitude: number;
+};
 
 function App() {
   const [count, setCount] = useState(0)
@@ -26,7 +34,9 @@ function App() {
   const requestBody : PipelineRequest = {
     dataset: selectedDb,
     starting_time: startTime,
-    variable: selectedVariable
+    variable: selectedVariable,
+    latitude: latitude,
+    longitude: longitude
   };
   const handleApiCall = async () => {
     if (!paramsReady) return;
