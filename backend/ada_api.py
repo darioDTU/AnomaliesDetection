@@ -131,20 +131,22 @@ async def run_pipeline_classic(params : PipelineParams):
                                         minimum_longitude=min_longitude,
                                         maximum_longitude=max_longitude)
     
-    if not os.path.exists("climatology.nc"):
-        # Download climatology.nc from Copernicus
-        baseline = CopernicusFetcher().fetch_temperature(
-            dataset_id=dataset,
-            starting_time=starting_time,
-            ending_time=ending_time,
-            variable=variable,
-            minimum_latitude=min_latitude,
-            maximum_latitude=max_latitude,
-            minimum_longitude=min_longitude,
-            maximum_longitude=max_longitude,
-            climatology=True
-        )
-        anomalies_class.ClimatologyCalculation(baseline, output)
+    climatology_path = "climatology.nc"
+    if os.path.exists(climatology_path):
+        os.remove(climatology_path)
+        
+    baseline = CopernicusFetcher().fetch_temperature(
+        dataset_id=dataset,
+        starting_time=starting_time,
+        ending_time=ending_time,
+        variable=variable,
+        minimum_latitude=min_latitude,
+        maximum_latitude=max_latitude,
+        minimum_longitude=min_longitude,
+        maximum_longitude=max_longitude,
+        climatology=True
+    )
+    anomalies_class.ClimatologyCalculation(baseline, output)
         
     climatology = xr.open_dataarray("climatology.nc")
     da4d = output[variable]
