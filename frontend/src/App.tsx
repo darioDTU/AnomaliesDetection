@@ -148,18 +148,6 @@ function App() {
 
         </main>
       </div>
-
-      <div className="card">
-        <button
-          className="cute-btn"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          count is {count}
-        </button>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </div>
   )
 }
