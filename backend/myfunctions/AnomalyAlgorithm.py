@@ -226,7 +226,7 @@ class AnomaliesCalculation:
         climatology = threshold_extended - threshold_value
         
         da1d.to_netcdf("results/da1d.nc")
-        threshold.to_netcdf("results/threshold.nc")
+        threshold_extended.to_netcdf("results/threshold.nc")
 
         plt.plot(da1d['time'], da1d, label = 'Variable')
         plt.plot(climatology['time'], climatology.values, label='Climatology', color='black', linewidth=2, alpha=0.3)
