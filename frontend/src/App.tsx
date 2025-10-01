@@ -15,7 +15,6 @@ export type PipelineRequest = {
 };
 
 function App() {
-  const [count, setCount] = useState(0)
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [selectedDb, setSelectedDb] = useState('cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m');
