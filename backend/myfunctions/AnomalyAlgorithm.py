@@ -26,9 +26,6 @@ class AnomaliesCalculation:
         # climatology = climatology.squeeze()
         climatology = climatology[variable]
         da4d = dataset[variable]
-        print("heree")
-        print(climatology)
-        print(da4d)
         climatology.to_netcdf("climatology.nc")
 
         return da4d, climatology
