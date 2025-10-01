@@ -8,10 +8,10 @@ import { useState } from 'react'
 
 export type PipelineRequest = {
   dataset: string;
-  starting_time: string;
-  variable: string;
   latitude: number;
   longitude: number;
+  starting_time: string;
+  variable: string;
 };
 
 function App() {
@@ -33,10 +33,10 @@ function App() {
   const paramsReady = latitude !== null && longitude !== null && selectedDb && startTime && selectedVariable
   const requestBody : PipelineRequest = {
     dataset: selectedDb,
-    starting_time: startTime,
-    variable: selectedVariable,
     latitude: latitude,
-    longitude: longitude
+    longitude: longitude,
+    starting_time: startTime,
+    variable: selectedVariable
   };
   const handleApiCall = async () => {
     if (!paramsReady) return;
@@ -163,5 +163,5 @@ function App() {
     </div>
   )
 }
- 
+
 export default App

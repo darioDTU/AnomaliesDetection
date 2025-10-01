@@ -67,10 +67,10 @@ class APIHelper:
 
 class PipelineParams(BaseModel):
     dataset: str
-    starting_time: str
-    variable : str
     latitude: float
     longitude: float
+    starting_time: str
+    variable : str
 
 app = FastAPI(root_path="/api")
 
