@@ -14,7 +14,11 @@ interface SidebarProps {
   variableList: string[];
   startTime: string;
   setStartTime: (time: string) => void;
+  selectedAlgorithm: string;
+  setSelectedAlgorithm: (algorithm: string) => void;
+  algorithmList: string[];
 }
+
 
 const Sidebar: React.FC<SidebarProps> = ({
   latitude, setLatitude,
@@ -24,6 +28,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   selectedVariable, setSelectedVariable,
   variableList,
   startTime, setStartTime,
+  selectedAlgorithm, setSelectedAlgorithm,
+  algorithmList
 }) => (
   <aside className="sidebar">
     <div className="sidebar-section sidebar-dashboard">
@@ -55,6 +61,15 @@ const Sidebar: React.FC<SidebarProps> = ({
         Choose Variable:
         <select value={selectedVariable} onChange={e => setSelectedVariable(e.target.value)}>
           {variableList.map(variable => <option key={variable} value={variable}>{variable}</option>)}
+        </select>
+      </label>
+    </div>
+    <div className="sidebar-section">
+      <h3>Algorithm</h3>
+      <label>
+        Choose Algorithm:
+        <select value={selectedAlgorithm} onChange={e => setSelectedAlgorithm(e.target.value)}>
+          {algorithmList.map(alg => <option key={alg} value={alg}>{alg}</option>)}
         </select>
       </label>
     </div>

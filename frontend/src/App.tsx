@@ -19,9 +19,11 @@ function App() {
   const [longitude, setLongitude] = useState(0);
   const [selectedDb, setSelectedDb] = useState('cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m');
   const [selectedVariable, setSelectedVariable] = useState('thetao');
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState('Classic');
   const [startTime, setStartTime] = useState('');
   const dbList = ['cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', 'db2', 'db3'];
   const variableList = ['thetao', 'Salinity'];
+  const algorithmList = ['POT', 'Classic'];
 
   const [, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,12 @@ function App() {
     try {
       // const result = await fetchData(ENDPOINTS.run);
       // setData(result);
-      const pipelineResult = await postData(ENDPOINTS.run, requestBody);
+      let pipelineResult;
+    if (selectedAlgorithm === 'POT') {
+      pipelineResult = await postData(ENDPOINTS.runPOT, requestBody);
+    } else {
+      pipelineResult = await postData(ENDPOINTS.runClassic, requestBody);
+    }
       setData(pipelineResult);
       // Fetch stats after running the pipeline
       const stats = await fetchData(ENDPOINTS.getStats);
@@ -95,13 +102,17 @@ function App() {
           selectedDb={selectedDb}
           startTime={startTime}
           selectedVariable={selectedVariable}
+          selectedAlgorithm={selectedAlgorithm}
           setLatitude={setLatitude}
           setLongitude={setLongitude}
           setSelectedDb={setSelectedDb}
           setStartTime={setStartTime}
           setSelectedVariable={setSelectedVariable}
+          setSelectedAlgorithm={setSelectedAlgorithm}
           dbList={dbList}
           variableList={variableList}
+          algorithmList={algorithmList}
+          
         />
         <main className="dashboard-content">
           <Map
