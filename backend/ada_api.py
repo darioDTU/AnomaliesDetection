@@ -98,7 +98,7 @@ async def add_process_time_header(request: Request, call_next):
 async def root():
     return {"message" : "Server online"}
 
-@app.post("/run_pipelin_anomalies/pot")
+@app.post("/run_pipeline_anomalies/pot")
 async def run_pipeline_pot(params : PipelineParams):
     dataset = params.dataset
     starting_time = f"01/01/{params.starting_time}"
