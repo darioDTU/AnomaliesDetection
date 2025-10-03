@@ -21,8 +21,8 @@ function App() {
   const [selectedVariable, setSelectedVariable] = useState('thetao');
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('Classic');
   const [startTime, setStartTime] = useState('');
-  const dbList = ['cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', 'db2', 'db3'];
-  const variableList = ['thetao', 'Salinity'];
+  const dbList = ['cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', 'cmems_mod_glo_phy_my_0.083deg_P1D-m'];
+  const variableList = ['thetao', 'so'];
   const algorithmList = ['POT', 'Classic'];
 
   const [, setData] = useState<any>(null);

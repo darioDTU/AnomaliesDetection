@@ -32,7 +32,7 @@ class CopernicusFetcher:
 
         '''Fetch temperature data from Copernicus database.'''
         if climatology:
-            starting_time = "1993/01/01"
+            starting_time = "2010/01/01"
             ending_time = datetime.now().strftime("%Y/%m/%d")
             dataset_id = dataset_id.replace("D", "M") 
 
