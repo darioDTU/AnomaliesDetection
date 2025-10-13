@@ -2,9 +2,10 @@ import './css/Dashboard.css'
 import './css/Api.css'
 import {ENDPOINTS} from './service/endpoints.ts'
 import {BASE_URL,fetchData, postData} from './service/api.ts'
+import { dbVariables, dbYears } from './service/db_variables.ts'
 import Map from './components/Map.tsx'
 import Sidebar from './components/Sidebar.tsx';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export type PipelineRequest = {
   dataset: string;
@@ -20,9 +21,11 @@ function App() {
   const [selectedDb, setSelectedDb] = useState('cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m');
   const [selectedVariable, setSelectedVariable] = useState('thetao');
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('Classic');
-  const [startTime, setStartTime] = useState('');
+  const [startTime, setStartTime] = useState(
+    (dbYears[selectedDb] && dbYears[selectedDb][0]) || ""
+  );
   const dbList = ['cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', 'cmems_mod_glo_phy_my_0.083deg_P1D-m'];
-  const variableList = ['thetao', 'so'];
+  const variableList = dbVariables[selectedDb] || [];
   const algorithmList = ['POT', 'Classic'];
 
   const [, setData] = useState<any>(null);
@@ -87,6 +90,10 @@ function App() {
     setLatitude(lat);
   };
 
+  useEffect(() => {
+    setStartTime((dbYears[selectedDb] && dbYears[selectedDb][0]) || "");
+  }, [selectedDb]);
+
   return (
     <div className="dashboard-bg">
       <header className="dashboard-header">
@@ -112,6 +119,7 @@ function App() {
           dbList={dbList}
           variableList={variableList}
           algorithmList={algorithmList}
+          availableYears={dbYears[selectedDb] || []}
           
         />
         <main className="dashboard-content">

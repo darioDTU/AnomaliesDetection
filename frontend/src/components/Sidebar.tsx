@@ -17,8 +17,8 @@ interface SidebarProps {
   selectedAlgorithm: string;
   setSelectedAlgorithm: (algorithm: string) => void;
   algorithmList: string[];
+  availableYears: string[]; // Add availableYears prop
 }
-
 
 const Sidebar: React.FC<SidebarProps> = ({
   latitude, setLatitude,
@@ -29,7 +29,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   variableList,
   startTime, setStartTime,
   selectedAlgorithm, setSelectedAlgorithm,
-  algorithmList
+  algorithmList,
+  availableYears
 }) => (
   <aside className="sidebar">
     <div className="sidebar-section sidebar-dashboard">
@@ -60,7 +61,15 @@ const Sidebar: React.FC<SidebarProps> = ({
       <label>
         Choose Variable:
         <select value={selectedVariable} onChange={e => setSelectedVariable(e.target.value)}>
-          {variableList.map(variable => <option key={variable} value={variable}>{variable}</option>)}
+          {variableList.map(variable => (
+            <option key={variable} value={variable}>
+              {variable}
+            </option>
+          ))}
+          {/* Optionally, show disabled Salinity if not available */}
+          {!variableList.includes('so-Salinity') && (
+            <option value="so-Salinity" disabled>so-Salinity (not available)</option>
+          )}
         </select>
       </label>
     </div>
@@ -75,14 +84,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     </div>
     <div className="sidebar-section">
       <h3>Starting Year</h3>
-      <input
-        type="number"
-        value={startTime}
-        min="1900"
-        max="2100"
-        onChange={e => setStartTime(e.target.value)}
-        placeholder="YYYY"
-      />
+      <label>
+        <select value={startTime} onChange={e => setStartTime(e.target.value)}>
+          {availableYears.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+      </label>
     </div>
     {/* Add regions section if needed */}
   </aside>

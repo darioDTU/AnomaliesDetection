@@ -76,6 +76,7 @@ class PipelineParams(BaseModel):
 app = FastAPI(root_path="/api")
 
 app.state.db_path = None
+app.state.zq_pot = None
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -85,14 +86,14 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 ## Uncomment this line if you want to run test locally without a proxy
-# origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,      # or ["*"] for dev
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-#     allow_credentials=False,    # set True only if you use cookies/auth
-# )
+origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,      # or ["*"] for dev
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=False,    # set True only if you use cookies/auth
+)
 
 @app.get("/")
 async def root():
@@ -103,13 +104,14 @@ async def run_pipeline_pot(params : PipelineParams):
     dataset = params.dataset
     starting_time = f"01/01/{params.starting_time}"
     ending_time = f"31/12/{params.starting_time}"
-    variable = params.variable
+    variable = params.variable.split('-')[0]
+    variable_name = params.variable.split('-')[-1]
     min_latitude = params.latitude
     max_latitude = min_latitude + 5
     min_longitude = params.longitude
     max_longitude = min_longitude + 5
 
-    anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95)
+    anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
 
     output = CopernicusFetcher().fetch_temperature(
                                         dataset_id=dataset, 
@@ -120,11 +122,11 @@ async def run_pipeline_pot(params : PipelineParams):
                                         maximum_latitude=max_latitude,
                                         minimum_longitude=min_longitude,
                                         maximum_longitude=max_longitude)
-    
-    climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}.nc"
+
+    climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
     if not os.path.exists(climatology_path):
-        # if app.state.db_path != None:
-        #     os.remove(app.state.db_path)
+        if app.state.db_path != None:
+            os.remove(app.state.db_path)
         
         app.state.db_path = climatology_path
         baseline = CopernicusFetcher().fetch_temperature(
@@ -138,12 +140,15 @@ async def run_pipeline_pot(params : PipelineParams):
             maximum_longitude=max_longitude,
             climatology=True
         )
-        anomalies_class.ClimatologyCalculation(baseline, output)
+        anomalies_class.ClimatologyCalculation(baseline, output, variable)
+        threshold_value, threshold_array = anomalies_class.POT(baseline[variable])
+        print(threshold_value)
+        app.state.zq_pot = threshold_value
 
     climatology = xr.open_dataarray(climatology_path)
     da4d = output[variable]
-    threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)
-    anomalies_class.showGraph_scalar(da4d, threshold_value, climatology)
+    threshold_value = app.state.zq_pot
+    anomalies_class.showGraph_scalar(da4d, threshold_value, climatology, variable_name)
     return {"Status": "ok", 
             "Threshold Value": threshold_value}
     
@@ -153,13 +158,14 @@ async def run_pipeline_classic(params : PipelineParams):
     dataset = params.dataset
     starting_time = f"01/01/{params.starting_time}"
     ending_time = f"31/12/{params.starting_time}"
-    variable = params.variable
+    variable = params.variable.split('-')[0]
+    variable_name = params.variable.split('-')[-1]
     min_latitude = params.latitude
     max_latitude = min_latitude + 5
     min_longitude = params.longitude
     max_longitude = min_longitude + 5
     
-    anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95)
+    anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
 
     output = CopernicusFetcher().fetch_temperature(
                                         dataset_id=dataset, 
@@ -171,10 +177,10 @@ async def run_pipeline_classic(params : PipelineParams):
                                         minimum_longitude=min_longitude,
                                         maximum_longitude=max_longitude)
     
-    climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}.nc"
+    climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
     if not os.path.exists(climatology_path):
-        # if app.state.db_path != None:
-        #     os.remove(app.state.db_path)
+        if app.state.db_path != None:
+            os.remove(app.state.db_path)
         
         app.state.db_path = climatology_path
         baseline = CopernicusFetcher().fetch_temperature(
@@ -188,12 +194,12 @@ async def run_pipeline_classic(params : PipelineParams):
             maximum_longitude=max_longitude,
             climatology=True
         )
-        anomalies_class.ClimatologyCalculation(baseline, output)
+        anomalies_class.ClimatologyCalculation(baseline, output, variable)
         
     climatology = xr.open_dataarray(climatology_path)
     da4d = output[variable]
     threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
-    anomalies_class.showGraph(da4d, threshold_array, threshold_value)
+    anomalies_class.showGraph(da4d, threshold_array, threshold_value, variable_name)
     return {"Status": "ok", 
             "Threshold Value": threshold_value}
 
@@ -236,7 +242,7 @@ async def get_stats():
 # dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m'
 # starting_time = '01/01/2023'
 # output = CopernicusFetcher().fetch_temperature(dataset, starting_time)
-# climatology = xr.open_dataarray("backend/climatology.nc")
+# climatology = xr.open_dataarray("backend/climatology_cmems_mod_glo_phy_my_0.083deg_P1D-m_-46.0_145.0.nc")
 # print(climatology)
 # da4d = output['thetao']
 # threshold = ProcessAnomalies(da4d, climatology, 0)

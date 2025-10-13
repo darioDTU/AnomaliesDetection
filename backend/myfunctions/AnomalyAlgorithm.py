@@ -17,27 +17,29 @@ class AnomaliesCalculation:
     starting_time : str
     dataset : str
     percentile : int
+    variable : str
 
-    def __init__(self, min_latitude: float, min_longitude: float, starting_time : str,dataset: str, percentile : int) -> None:
+    def __init__(self, min_latitude: float, min_longitude: float, starting_time : str,dataset: str, percentile : int, variable: str) -> None:
         self.min_latitude = min_latitude
         self.min_longitude = min_longitude
         self.starting_time = starting_time
         self.dataset = dataset
         self.percentile = percentile
-    def ClimatologyCalculation(self, baseline, dataset, variable='thetao'):
+        self.variable = variable
+    def ClimatologyCalculation(self, baseline, dataset, variable):
         # compute the mean across the 'time' dimension
         climatology = baseline.groupby("time.month").mean("time", skipna=True)
         # climatology = climatology.squeeze()
         climatology = climatology[variable]
         da4d = dataset[variable]
-        climatology.to_netcdf(f"climatology_{self.dataset}_{self.min_latitude}_{self.min_longitude}.nc")
+        climatology.to_netcdf(f"climatology_{self.dataset}_{self.min_latitude}_{self.min_longitude}_{self.variable}.nc")
 
         return da4d, climatology
 
     def __get_year(self):
         return self.starting_time.split("/")[-1]
 
-    def __AnomalyDetection(self, da4d, climatology):
+    def AnomalyDetection(self, da4d, climatology):
         # clim0 = climatology.isel(year=0, drop=True)½
         # climatology = climatology.assign_coords(month=climatology['month'].astype(int))
         # climatology = climatology.to_array(dim='var')
@@ -123,7 +125,7 @@ class AnomaliesCalculation:
 
         # initial calibration using POT on first n samples
         cal = X[:n]
-        zq, t = self.__POT(cal, q, t_pct=self.percentile/100)
+        zq, t = self.POT(cal, q, t_pct=self.percentile/100)
 
         # Record initial peaks above t
         peaks = list(cal[cal > t] - t)
@@ -161,15 +163,15 @@ class AnomaliesCalculation:
         
         threshold = None
         if res == 0:
-            threshold_value, threshold = self.__AnomalyDetection(da6d, climatology)
+            threshold_value, threshold = self.AnomalyDetection(da6d, climatology)
 
         elif res == 1:
             # climatology = climatology.to_array(dim='var')
-            threshold_value, t = self.__POT(climatology)
+            threshold_value, t = self.POT(climatology)
             threshold = None
         else:
-            _, threshold, _ = self.__DSPOT(X=climatology, d=max_depth)
-
+            _, threshold_value, _ = self.__DSPOT(X=climatology, d=0)
+            threshold = None
         return threshold_value, threshold
 
     def DetectAnomalies(self, da6d, threshold):
@@ -207,7 +209,7 @@ class AnomaliesCalculation:
         plt.legend()
         plt.show()
 
-    def showGraph_scalar(self, da4d, threshold_value, climatology4d):
+    def showGraph_scalar(self, da4d, threshold_value, climatology4d, variable_name):
         plt.clf()
 
         da3d = da4d.isel(depth=0, drop=True)
@@ -252,12 +254,12 @@ class AnomaliesCalculation:
         plt.grid(True)
         plt.title(f"Anomaly Detection for {self.__get_year()}")
         plt.xlabel("Time [Day of Year]")
-        plt.ylabel("Value")
+        plt.ylabel(variable_name)
         plt.legend()
         plt.tight_layout()
         plt.savefig('results/plot.png')
         plt.close()
-    def showGraph(self, da4d, threshold, threshold_value):
+    def showGraph(self, da4d, threshold, threshold_value, variable_name):
         plt.clf()
         
         da3d = da4d.isel(depth=0, drop=True)
@@ -292,7 +294,7 @@ class AnomaliesCalculation:
         
         plt.title(f"Anomaly Detection for {self.__get_year()}")
         plt.xlabel("Time [Day of Year]")
-        plt.ylabel("Value")
+        plt.ylabel(variable_name)
         plt.legend()
         plt.tight_layout()
         plt.savefig('results/plot.png')
