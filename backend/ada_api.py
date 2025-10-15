@@ -76,7 +76,6 @@ class PipelineParams(BaseModel):
 app = FastAPI(root_path="/api")
 
 app.state.db_path = None
-app.state.zq_pot = None
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -141,13 +140,11 @@ async def run_pipeline_pot(params : PipelineParams):
             climatology=True
         )
         anomalies_class.ClimatologyCalculation(baseline, output, variable)
-        threshold_value, threshold_array = anomalies_class.POT(baseline[variable])
-        print(threshold_value)
-        app.state.zq_pot = threshold_value
 
     climatology = xr.open_dataarray(climatology_path)
     da4d = output[variable]
-    threshold_value = app.state.zq_pot
+    threshold_value, threshold_array = anomalies_class.POT(climatology)
+    print('ciao', threshold_value)
     anomalies_class.showGraph_scalar(da4d, threshold_value, climatology, variable_name)
     return {"Status": "ok", 
             "Threshold Value": threshold_value}

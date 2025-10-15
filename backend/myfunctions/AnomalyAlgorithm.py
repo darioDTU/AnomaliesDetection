@@ -60,7 +60,7 @@ class AnomaliesCalculation:
         return threshold_value, threshold_array
 
     #TODO modify percentile
-    def __POT(self, X, q=0.01, t=None, t_pct=95/100):
+    def POT(self, X, q=0.01, t=None, t_pct=95/100):
         """
         Peaks-Over-Threshold value estimator
 
