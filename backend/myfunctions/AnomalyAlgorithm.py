@@ -39,6 +39,30 @@ class AnomaliesCalculation:
     def __get_year(self):
         return self.starting_time.split("/")[-1]
 
+    def __compute_da1d(self, da4d):
+        
+        da3d = da4d.isel(depth=0, drop=True)
+        da1d = da3d.mean(dim=('latitude','longitude'))
+        da1d['time'] = da1d['time'].dt.dayofyear
+        daily_days = np.arange(1, 367)
+        da1d = da1d.interp(coords={"time": daily_days})
+        
+        return da1d
+    def __compute_variable(self, variable1d):
+        
+        daily_days = np.arange(1, 367)
+        mid_month_day = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349]
+        extended_days = np.concatenate(([mid_month_day[-1] - 365], mid_month_day, [mid_month_day[0] + 365]))
+        extended_values = np.concatenate(([variable1d[-1]], variable1d, [variable1d[0]]))
+        
+        variable_extended = xr.DataArray(
+            extended_values,
+            dims = "time",
+            coords={"time":extended_days}
+        )
+        variable_extended = variable_extended.interp(coords={"time": daily_days})
+        
+        return variable_extended
     def AnomalyDetection(self, da4d, climatology):
         # clim0 = climatology.isel(year=0, drop=True)½
         # climatology = climatology.assign_coords(month=climatology['month'].astype(int))
@@ -57,7 +81,7 @@ class AnomaliesCalculation:
         anomalies = deviation.where(mask)
 
         threshold_array = climatology + threshold_value
-        return threshold_value, threshold_array
+        return [threshold_value], threshold_array
 
     #TODO modify percentile
     def POT(self, X, q=0.01, t=None, t_pct=95/100):
@@ -161,18 +185,28 @@ class AnomaliesCalculation:
 
     def ProcessAnomalies(self, da6d, climatology, res):
         
-        threshold = None
         if res == 0:
-            threshold_value, threshold = self.AnomalyDetection(da6d, climatology)
+            threshold_value, threshold_array = self.AnomalyDetection(da6d, climatology)
 
         elif res == 1:
             # climatology = climatology.to_array(dim='var')
-            threshold_value, t = self.POT(climatology)
-            threshold = None
+            threshold_value = []
+            for climatology_per_month in climatology:
+                threshold_value_monthly, t = self.POT(climatology_per_month)
+                threshold_value.append(threshold_value_monthly)
+
+            months = np.arange(1, 13)
+            
+            threshold_array = xr.DataArray(
+                    threshold_value,
+                    dims=["month"],
+                    coords={"month": months},
+                    name="pot_threshold"
+                )
         else:
             _, threshold_value, _ = self.__DSPOT(X=climatology, d=0)
-            threshold = None
-        return threshold_value, threshold
+            threshold_array = None
+        return threshold_value, threshold_array
 
     def DetectAnomalies(self, da6d, threshold):
         """
@@ -209,78 +243,15 @@ class AnomaliesCalculation:
         plt.legend()
         plt.show()
 
-    def showGraph_scalar(self, da4d, threshold_value, climatology4d, variable_name):
-        plt.clf()
-
-        da3d = da4d.isel(depth=0, drop=True)
-        da1d = da3d.mean(dim=('latitude','longitude'))
-        da1d['time'] = da1d['time'].dt.dayofyear
-        daily_days = np.arange(1, 367)
-        da1d = da1d.interp(coords={"time": daily_days})
-
-        climatology3d = climatology4d.isel(depth=0, drop=True)
-        climatology1d = climatology3d.mean(dim=('latitude','longitude'))
-        mid_month_day = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349]
-        extended_days = np.concatenate(([mid_month_day[-1] - 365], mid_month_day, [mid_month_day[0] + 365]))
-        extended_values = np.concatenate(([climatology1d[-1]], climatology1d, [climatology1d[0]]))
-        
-        climatology = xr.DataArray(
-            extended_values,
-            dims = "time",
-            coords={"time":extended_days}
-        )
-
-        # make horizontal threshold line
-        threshold_line = xr.DataArray(
-            np.full_like(daily_days, threshold_value, dtype=float),
-            dims="time",
-            coords={"time": daily_days}
-        )
-
-        # save
-        da1d.to_netcdf("results/da1d.nc")
-        threshold_line.to_netcdf("results/threshold.nc")
-
-        # plot
-        plt.plot(da1d['time'], da1d, label='Variable')
-        plt.plot(climatology['time'], climatology.values, label='Climatology', color='black', linewidth=2, alpha=0.3)
-        plt.plot(threshold_line['time'], threshold_line.values,
-                    label='Threshold (POT)', linestyle='--', color='red')
-
-        plt.fill_between(da1d['time'], da1d, threshold_line,
-                            where=(da1d > threshold_line),
-                            color='red', alpha=0.3, label='Anomalies')
-
-        plt.grid(True)
-        plt.title(f"Anomaly Detection for {self.__get_year()}")
-        plt.xlabel("Time [Day of Year]")
-        plt.ylabel(variable_name)
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig('results/plot.png')
-        plt.close()
     def showGraph(self, da4d, threshold, threshold_value, variable_name):
         plt.clf()
         
-        da3d = da4d.isel(depth=0, drop=True)
-        da1d = da3d.mean(dim=('latitude','longitude'))
-        da1d['time'] = da1d['time'].dt.dayofyear
-        daily_days = np.arange(1, 367)
-        da1d = da1d.interp(coords={"time": daily_days})
-        
-        threshold = threshold.isel(depth=0, drop=True)
-        threshold = threshold.mean(dim=('latitude','longitude'))
-        mid_month_day = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349]
-        extended_days = np.concatenate(([mid_month_day[-1] - 365], mid_month_day, [mid_month_day[0] + 365]))
-        extended_values = np.concatenate(([threshold[-1]], threshold, [threshold[0]]))
-        
-        threshold_extended = xr.DataArray(
-            extended_values,
-            dims = "time",
-            coords={"time":extended_days}
-        )
-        
-        threshold_extended = threshold_extended.interp(coords={"time": daily_days})
+        da1d = self.__compute_da1d(da4d)
+
+        threshold3d = threshold.isel(depth=0, drop=True)        
+        threshold = threshold3d.mean(dim=('latitude','longitude'))
+        threshold_extended = self.__compute_variable(threshold)
+        threshold_value = np.array(threshold_value)
         climatology = threshold_extended - threshold_value
                                
         da1d.to_netcdf("results/da1d.nc")
@@ -290,6 +261,34 @@ class AnomaliesCalculation:
         plt.plot(climatology['time'], climatology.values, label='Climatology', color='black', linewidth=2, alpha=0.3)
         plt.plot(threshold_extended['time'], threshold_extended.values, label='Threshold', linestyle='--')
         plt.fill_between(da1d['time'], da1d, threshold_extended, where=(da1d > threshold_extended), color='red', alpha=0.3, label='Anomaly 95th Percentile')
+        plt.grid(True)
+        
+        plt.title(f"Anomaly Detection for {self.__get_year()}")
+        plt.xlabel("Time [Day of Year]")
+        plt.ylabel(variable_name)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig('results/plot.png')
+        plt.close()
+        
+    def showGraphPOT(self, da4d, threshold, climatology4d, variable_name):
+        plt.clf()
+        
+        da1d = self.__compute_da1d(da4d)
+        
+        climatology3d = climatology4d.isel(depth=0, drop=True)
+        climatology1d = climatology3d.mean(dim=('latitude','longitude'))
+        
+        threshold_extended = self.__compute_variable(threshold)
+        climatology = self.__compute_variable(climatology1d)
+                               
+        da1d.to_netcdf("results/da1d.nc")
+        threshold_extended.to_netcdf("results/threshold.nc")
+
+        plt.plot(da1d['time'], da1d, label = 'Variable')
+        plt.plot(climatology['time'], climatology.values, label='Climatology', color='black', linewidth=2, alpha=0.3)
+        plt.plot(threshold_extended['time'], threshold_extended.values, label='Threshold (POT)', linestyle='--')
+        plt.fill_between(da1d['time'], da1d, threshold_extended, where=(da1d > threshold_extended), color='red', alpha=0.3, label='Anomalies')
         plt.grid(True)
         
         plt.title(f"Anomaly Detection for {self.__get_year()}")

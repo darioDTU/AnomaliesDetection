@@ -4,7 +4,6 @@ import time
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-import pandas as pd
 from pydantic import BaseModel
 import xarray as xr
 # from dask.distributed import Client
@@ -143,9 +142,8 @@ async def run_pipeline_pot(params : PipelineParams):
 
     climatology = xr.open_dataarray(climatology_path)
     da4d = output[variable]
-    threshold_value, threshold_array = anomalies_class.POT(climatology)
-    print('ciao', threshold_value)
-    anomalies_class.showGraph_scalar(da4d, threshold_value, climatology, variable_name)
+    threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)
+    anomalies_class.showGraphPOT(da4d, threshold_array, climatology, variable_name)
     return {"Status": "ok", 
             "Threshold Value": threshold_value}
     
@@ -239,7 +237,7 @@ async def get_stats():
 # dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m'
 # starting_time = '01/01/2023'
 # output = CopernicusFetcher().fetch_temperature(dataset, starting_time)
-# climatology = xr.open_dataarray("backend/climatology_cmems_mod_glo_phy_my_0.083deg_P1D-m_-46.0_145.0.nc")
+# climatology = xr.open_dataarray("backend/climatology_cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m_0.0_-6.0_thetao.nc")
 # print(climatology)
 # da4d = output['thetao']
 # threshold = ProcessAnomalies(da4d, climatology, 0)
