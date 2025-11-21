@@ -1,5 +1,7 @@
 import './css/Dashboard.css'
 import './css/Api.css'
+import './css/Map.css'
+import './css/Sidebar.css'
 import {ENDPOINTS} from './service/endpoints.ts'
 import {BASE_URL,fetchData, postData} from './service/api.ts'
 import { dbVariables, dbYears } from './service/db_variables.ts'
@@ -102,33 +104,40 @@ function App() {
           <p className="dashboard-subtitle">Advanced geospatial analytics dashboard</p>
         </div>
       </header>
-      <div className="dashboard-main">
-        <Sidebar
-          latitude={latitude}
-          longitude={longitude}
-          selectedDb={selectedDb}
-          startTime={startTime}
-          selectedVariable={selectedVariable}
-          selectedAlgorithm={selectedAlgorithm}
-          setLatitude={setLatitude}
-          setLongitude={setLongitude}
-          setSelectedDb={setSelectedDb}
-          setStartTime={setStartTime}
-          setSelectedVariable={setSelectedVariable}
-          setSelectedAlgorithm={setSelectedAlgorithm}
-          dbList={dbList}
-          variableList={variableList}
-          algorithmList={algorithmList}
-          availableYears={dbYears[selectedDb] || []}
-          
-        />
-        <main className="dashboard-content">
+      <div className="top-section">
+        <div className="map-container">
           <Map
+              latitude={latitude}
+              longitude={longitude}
+              rectangleBounds={rectangleBounds}
+              onMapClick={handleMapClick}
+            />
+        </div>
+        <aside className="sidebar">
+          <Sidebar
             latitude={latitude}
             longitude={longitude}
-            rectangleBounds={rectangleBounds}
-            onMapClick={handleMapClick}
+            selectedDb={selectedDb}
+            startTime={startTime}
+            selectedVariable={selectedVariable}
+            selectedAlgorithm={selectedAlgorithm}
+            setLatitude={setLatitude}
+            setLongitude={setLongitude}
+            setSelectedDb={setSelectedDb}
+            setStartTime={setStartTime}
+            setSelectedVariable={setSelectedVariable}
+            setSelectedAlgorithm={setSelectedAlgorithm}
+            dbList={dbList}
+            variableList={variableList}
+            algorithmList={algorithmList}
+            availableYears={dbYears[selectedDb] || []}
+            
           />
+        </aside>
+      </div>
+
+        <div className="bottom-panel">
+          
           <button
             className="cute-btn"
             onClick={handleApiCall}
@@ -164,8 +173,7 @@ function App() {
           </>
           )}
 
-        </main>
-      </div>
+        </div>
     </div>
   )
 }

@@ -1,11 +1,16 @@
 .dashboard-bg {
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
   background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
 }
 
 .dashboard-header {
+  width: 100%; 
   background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
-  color: #fff;
+  color: white;
   padding: 24px 32px;
   display: flex;
   align-items: center;
@@ -23,82 +28,21 @@
   opacity: 0.8;
 }
 
-.dashboard-main {
+.top-section {
   display: flex;
-  min-height: calc(100vh - 80px); /* adjust header height */
-}
-
-.sidebar {
-  width: 320px;
-  background: #f8fafc;
-  padding: 32px 24px;
-  box-sizing: border-box;
-  border-right: 1px solid #e0e7ff;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.sidebar-section {
-  margin-bottom: 24px;
-}
-
-.sidebar-dashboard {
-  background: #a5b4fc;
-  border-radius: 16px;
-  padding: 16px;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.sidebar-icon {
-  font-size: 2rem;
-  margin-right: 8px;
-}
-
-.sidebar label, .sidebar h3 {
-  color: #6366f1;
-  font-weight: 600;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.sidebar input, .sidebar select {
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #c7d2fe;
-  font-size: 1rem;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(99,102,241,0.04);
-  color: #111111; 
-}
-
-.dashboard-content {
   flex: 1;
-  background: #f1f5f9;
-  padding: 32px;
+  width: 100%;
+  overflow: hidden;
 }
 
-.dashboard-map-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: #222;
-}
-
-
-.card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(99,102,241,0.08);
-  padding: 24px;
-  max-width: 400px;
-  margin: 32px auto;
-  text-align: center;
+.bottom-panel {
+  height: 35vh;
+  min-height: 250px;
+  max-height: 45vh;
+  background: white;
+  border-top: 1px solid #ccc;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .cute-btn {
@@ -120,36 +64,4 @@
   cursor: not-allowed;
   opacity: 0.6;
   box-shadow: none;
-}
-
-.read-the-docs {
-  text-align: center;
-  color: #6366f1;
-  font-weight: 500;
-  margin-top: 16px;
-  font-size: 1rem;
-}
-
-.squares-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 24px;
-}
-
-.square-row {
-  display: flex;
-}
-
-.square {
-  background: #fff;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-  font-size: 1.5rem;
-  width: 60px;
-  height: 60px;
-  margin: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
 }

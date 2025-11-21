@@ -111,5 +111,5 @@ export default function Map({ latitude, longitude, rectangleBounds , onMapClick}
     };
   }, [latitude, longitude, rectangleBounds, onMapClick]);
 
-  return <div ref={mapContainer} style={{ width: '100vw', height: '400px', margin: '0 auto' }} />;
+  return <div ref={mapContainer} style={{ width: '100%', height: '100%'}} />;
 }

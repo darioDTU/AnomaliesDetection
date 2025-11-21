@@ -1,0 +1,65 @@
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;   /* ✨ IMPORTANT: prevents sidebar from shrinking the map */
+  background: #f8fafc;
+  padding: 32px 24px;
+  box-sizing: border-box;
+  display: block;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+.sidebar * {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.sidebar-section{
+  margin-bottom: 24px;
+}
+
+.sidebar-dashboard{
+  background: #a5b4fc;
+  border-radius: 16px;
+  padding: 16px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+
+.sidebar-section {
+  margin-bottom: 24px;
+}
+
+.sidebar-dashboard {
+  background: #a5b4fc;
+  border-radius: 16px;
+  padding: 16px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sidebar label, .sidebar h3 {
+  color: #6366f1;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.sidebar input, .sidebar select {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #c7d2fe;
+  font-size: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.04);
+  color: #111111; 
+}

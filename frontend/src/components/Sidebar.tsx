@@ -1,5 +1,5 @@
 import React from 'react'
-import '../css/Dashboard.css'
+import '../css/Sidebar.css'
 
 interface SidebarProps {
   latitude: number;
