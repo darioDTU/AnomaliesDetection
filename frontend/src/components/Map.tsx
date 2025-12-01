@@ -23,7 +23,7 @@ export default function Map({ latitude, longitude, rectangleBounds , onMapClick}
     if (!map) {
       map = new maplibregl.Map({
         container: mapContainer.current,
-        style: 'https://api.maptiler.com/maps/019adaca-9392-7610-a1e0-89c3cf4bb095/style.json?key=ZaJJlmg85RpSs3eUudEF',
+        style: 'https://api.maptiler.com/maps/019adadb-5eb9-7200-93ec-1a29ba3832c9/style.json?key=ZaJJlmg85RpSs3eUudEF',
         center: [longitude, latitude],
         zoom: 4,
       });
