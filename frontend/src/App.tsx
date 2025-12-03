@@ -26,7 +26,7 @@ function App() {
   const [startTime, setStartTime] = useState(
     (dbYears[selectedDb] && dbYears[selectedDb][0]) || ""
   );
-  const dbList = ['cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', 'cmems_mod_glo_phy_my_0.083deg_P1D-m'];
+  const dbList = ['cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', 'cmems_mod_glo_phy_my_0.083deg_P1D-m', 'cmems_mod_glo_bgc_my_0.25deg_P1M-m'];
   const variableList = dbVariables[selectedDb] || [];
   const algorithmList = ['POT', 'Classic'];
 
