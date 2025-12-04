@@ -10,8 +10,8 @@ starting_time = '2024-01-01'
 ending_time = '2023-12-31'
 
 # Depth
-min_depth = 0.49402499198913574
-max_depth = 0.49402499198913574
+min_depth = 0.5057600140571594
+max_depth = 0.5057600140571594
 
 # Resolution
 area_resolution = 2

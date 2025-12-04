@@ -123,7 +123,7 @@ async def run_pipeline_pot(params : PipelineParams):
 
     climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
     if not os.path.exists(climatology_path):
-        if app.state.db_path != None:
+        if app.state.db_path is not None:
             os.remove(app.state.db_path)
         
         app.state.db_path = climatology_path
