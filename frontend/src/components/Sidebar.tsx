@@ -67,9 +67,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </option>
           ))}
           {/* Optionally, show disabled Salinity if not available */}
-          {!variableList.includes('so-Salinity') && (
-            <option value="so-Salinity" disabled>so-Salinity (not available)</option>
-          )}
+          {/* {!variableList.includes('so-Salinity') && (
+            <option value="so-Salinity" disabled> so-Salinity (not available)</option>
+          )} */}
         </select>
       </label>
     </div>

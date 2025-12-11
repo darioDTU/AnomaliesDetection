@@ -94,6 +94,9 @@ function App() {
 
   useEffect(() => {
     setStartTime((dbYears[selectedDb] && dbYears[selectedDb][0]) || "");
+    const availableVars = dbVariables[selectedDb] || [];
+    if (availableVars.length > 0 && !availableVars.includes(selectedVariable))
+      setSelectedVariable(availableVars[0]);
   }, [selectedDb]);
 
   return (
