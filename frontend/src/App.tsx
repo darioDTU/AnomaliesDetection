@@ -101,21 +101,13 @@ function App() {
 
   return (
     <div className="dashboard-bg">
-      <header className="dashboard-header">
+      {/* <header className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Anomalies Detection</h1>
           <p className="dashboard-subtitle">Advanced geospatial analytics dashboard</p>
         </div>
-      </header>
+      </header> */}
       <div className="top-section">
-        <div className="map-container">
-          <Map
-              latitude={latitude}
-              longitude={longitude}
-              rectangleBounds={rectangleBounds}
-              onMapClick={handleMapClick}
-            />
-        </div>
         <aside className="sidebar">
           <Sidebar
             latitude={latitude}
@@ -137,46 +129,64 @@ function App() {
             
           />
         </aside>
-      </div>
-
-        <div className="bottom-panel">
-          
+        <div className="map-container">
           <button
-            className="cute-btn"
+            className="cute-btn run-btn-top"
             onClick={handleApiCall}
             disabled={!paramsReady || loading}
-            style={{ margin: '16px 0' }}
           >
-            Run 
+            {loading ? 'Running...' : 'Run'}
           </button>
-          {hasPressButton && (
-          <>
-          {error && <div className='error'>{error}</div>}
-          {loading ? <div className='loading'>Loading...</div> : 
-            <div className='api-result'>
-            <div className="api-extra">
+          <Map
+              latitude={latitude}
+              longitude={longitude}
+              rectangleBounds={rectangleBounds}
+              onMapClick={handleMapClick}
+            />
+        </div>
+      </div>
+
+      {!loading && hasPressButton && !error && stats && (
+        <div className="modal-overlay" onClick={() => setHasPressButton(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setHasPressButton(false)}>×</button>
+            <div className="modal-header">
+              <h2>Analysis Results</h2>
+            </div>
+            <div className="modal-body">
               <img
                 src={`${BASE_URL}/${ENDPOINTS.showImage}?t=${Date.now()}`}
                 alt="API result"
-                className="api-image"
+                className="modal-image"
               />
-              <div className="api-stats">
+              <div className="modal-stats">
                 <h4>Statistics</h4>
                 <ul>
-                  {stats 
-                  ? Object.entries(stats).map(([key, value]) => (
-                      <li key={key}>
-                        <strong>{key}:</strong> {value as string}
-                      </li>))
-                      : <li>No statistics available.</li>}
+                  {Object.entries(stats).map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}:</strong> {value as string}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
-            </div>}
-          </>
-          )}
-
+          </div>
         </div>
+      )}
+
+      {error && hasPressButton && (
+        <div className="modal-overlay" onClick={() => setHasPressButton(false)}>
+          <div className="modal-content error-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setHasPressButton(false)}>×</button>
+            <div className="modal-header error-header">
+              <h2>Error</h2>
+            </div>
+            <div className="modal-body">
+              <p>{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
