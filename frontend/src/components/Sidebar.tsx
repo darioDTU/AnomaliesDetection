@@ -2,10 +2,6 @@ import React from 'react'
 import '../css/Sidebar.css'
 
 interface SidebarProps {
-  latitude: number;
-  setLatitude: (lat: number) => void;
-  longitude: number;
-  setLongitude: (lng: number) => void;
   selectedDb: string;
   setSelectedDb: (db: string) => void;
   dbList: string[];
@@ -21,8 +17,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-  latitude, setLatitude,
-  longitude, setLongitude,
   selectedDb, setSelectedDb,
   dbList,
   selectedVariable, setSelectedVariable,
@@ -35,20 +29,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   <aside className="sidebar">
     <div className="sidebar-section sidebar-dashboard">
       <div>
-        <h2>Dashboard</h2>
-        <p>Configure detection parameters and analyze regions</p>
+        <h2>Anomalies Detection</h2>
       </div>
-    </div>
-    <div className="sidebar-section">
-      <h3>Coordinates</h3>
-      <label>
-        Latitude:
-        <input type="number" value={latitude} onChange={e => setLatitude(Number(e.target.value))} />
-      </label>
-      <label>
-        Longitude:
-        <input type="number" value={longitude} onChange={e => setLongitude(Number(e.target.value))} />
-      </label>
     </div>
     <div className="sidebar-section">
       <h3>Database</h3>
@@ -83,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </label>
     </div>
     <div className="sidebar-section">
-      <h3>Starting Year</h3>
+      <h3>Anomaly Year</h3>
       <label>
         <select value={startTime} onChange={e => setStartTime(e.target.value)}>
           {availableYears.map(year => (

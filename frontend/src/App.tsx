@@ -143,6 +143,19 @@ function App() {
               rectangleBounds={rectangleBounds}
               onMapClick={handleMapClick}
             />
+          <div className="floating-sidebar">
+            <div className="coord-adjust-section">
+              <h3>Coordinates</h3>
+              <div className="coord-input-group">
+                <label>Latitude</label>
+                <input type="number" value={latitude} onChange={e => setLatitude(Number(e.target.value))} />
+              </div>
+              <div className="coord-input-group">
+                <label>Longitude</label>
+                <input type="number" value={longitude} onChange={e => setLongitude(Number(e.target.value))} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

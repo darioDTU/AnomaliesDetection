@@ -48,6 +48,61 @@
   z-index: 10;
 }
 
+.floating-sidebar {
+  position: absolute;
+  right: 20px;
+  top: 80px;
+  width: 260px;
+  background: rgba(248, 250, 252, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(199, 210, 254, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 5;
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+}
+
+.coord-adjust-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6366f1;
+}
+
+.coord-input-group {
+  margin-bottom: 12px;
+}
+
+.coord-input-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: #6366f1;
+}
+
+.coord-input-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  background: #fff;
+  color: #111111;
+  font-size: 1rem;
+  box-sizing: border-box;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.04);
+}
+
+.coord-input-group input::placeholder {
+  color: #cbd5e1;
+}
+
+.coord-input-group input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: #fff;
+}
+
 .cute-btn {
   background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
   color: #fff;
