@@ -146,7 +146,7 @@ function App() {
         </div>
       </div>
 
-      {!loading && hasPressButton && !error && stats && (
+      {!loading && hasPressButton && error==null && stats!==null && (
         <div className="modal-overlay" onClick={() => setHasPressButton(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setHasPressButton(false)}>×</button>
