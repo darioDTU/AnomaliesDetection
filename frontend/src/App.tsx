@@ -110,14 +110,10 @@ function App() {
       <div className="top-section">
         <aside className="sidebar">
           <Sidebar
-            latitude={latitude}
-            longitude={longitude}
             selectedDb={selectedDb}
             startTime={startTime}
             selectedVariable={selectedVariable}
             selectedAlgorithm={selectedAlgorithm}
-            setLatitude={setLatitude}
-            setLongitude={setLongitude}
             setSelectedDb={setSelectedDb}
             setStartTime={setStartTime}
             setSelectedVariable={setSelectedVariable}
