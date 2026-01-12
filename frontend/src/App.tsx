@@ -171,11 +171,12 @@ function App() {
               <div className="modal-stats">
                 <h4>Statistics</h4>
                 <ul>
-                  {Object.entries(stats).map(([key, value]) => (
-                    <li key={key}>
-                      <strong>{key}:</strong> {value as string}
-                    </li>
-                  ))}
+                  {stats 
+                  ? Object.entries(stats).map(([key, value]) => (
+                      <li key={key}>
+                        <strong>{key}:</strong> {value as string}
+                      </li>))
+                    : <li>No statistics available for area with no anomalies</li>}
                 </ul>
               </div>
             </div>
