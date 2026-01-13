@@ -2,12 +2,16 @@ import './css/Dashboard.css'
 import './css/Api.css'
 import './css/Map.css'
 import './css/Sidebar.css'
-import {ENDPOINTS} from './service/endpoints.ts'
-import {BASE_URL,fetchData, postData} from './service/api.ts'
-import { dbVariables, dbYears } from './service/db_variables.ts'
+import { ENDPOINTS } from './service/endpoints.ts'
+import { dbVariables, dbYears } from './service/dbVariables.ts'
+import FloatingSidebar from './components/FloatingSidebar.tsx'
 import Map from './components/Map.tsx'
 import Sidebar from './components/Sidebar.tsx';
+import { fetchData, postData } from './service/api.ts'
 import { useState, useEffect } from 'react'
+
+import ErrorModalWindow from './components/ErrorModalWindow.tsx'
+import ModalWindow from './components/ModalWindow.tsx'
 
 export type PipelineRequest = {
   dataset: string;
@@ -36,7 +40,9 @@ function App() {
   const [stats, setStats] = useState(null);
 
   const [hasPressButton, setHasPressButton] = useState(false);
-  const paramsReady = latitude !== null && longitude !== null && selectedDb && startTime && selectedVariable
+  const paramsReady = Boolean(
+		latitude !== null && longitude !== null && selectedDb && startTime && selectedVariable
+	)
   const requestBody : PipelineRequest = {
     dataset: selectedDb,
     latitude: latitude,
@@ -139,63 +145,21 @@ function App() {
               rectangleBounds={rectangleBounds}
               onMapClick={handleMapClick}
             />
-          <div className="floating-sidebar">
-            <div className="coord-adjust-section">
-              <h3>Coordinates</h3>
-              <div className="coord-input-group">
-                <label>Latitude</label>
-                <input type="number" value={latitude} onChange={e => setLatitude(Number(e.target.value))} />
-              </div>
-              <div className="coord-input-group">
-                <label>Longitude</label>
-                <input type="number" value={longitude} onChange={e => setLongitude(Number(e.target.value))} />
-              </div>
-            </div>
-          </div>
+          <FloatingSidebar
+            latitude={latitude}
+            longitude={longitude}
+            setLatitude={setLatitude}
+            setLongitude={setLongitude}
+          />
         </div>
       </div>
 
-      {!loading && hasPressButton && error==null && stats!==null && (
-        <div className="modal-overlay" onClick={() => setHasPressButton(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setHasPressButton(false)}>×</button>
-            <div className="modal-header">
-              <h2>Analysis Results</h2>
-            </div>
-            <div className="modal-body">
-              <img
-                src={`${BASE_URL}/${ENDPOINTS.showImage}?t=${Date.now()}`}
-                alt="API result"
-                className="modal-image"
-              />
-              <div className="modal-stats">
-                <h4>Statistics</h4>
-                <ul>
-                  {stats 
-                  ? Object.entries(stats).map(([key, value]) => (
-                      <li key={key}>
-                        <strong>{key}:</strong> {value as string}
-                      </li>))
-                    : <li>No statistics available for area with no anomalies</li>}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+      {!loading && hasPressButton && error == null && stats !== null && (
+        <ModalWindow setHasPressButton={setHasPressButton} stats={stats} />
       )}
 
       {error && hasPressButton && (
-        <div className="modal-overlay" onClick={() => setHasPressButton(false)}>
-          <div className="modal-content error-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setHasPressButton(false)}>×</button>
-            <div className="modal-header error-header">
-              <h2>Error</h2>
-            </div>
-            <div className="modal-body">
-              <p>{error}</p>
-            </div>
-          </div>
-        </div>
+        <ErrorModalWindow setHasPressButton={setHasPressButton} error={error} />
       )}
     </div>
   )
