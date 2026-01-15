@@ -28,21 +28,20 @@ class AnomaliesCalculation:
         self.variable = variable
     def ClimatologyCalculation(self, baseline, dataset, variable):
         # compute the mean across the 'time' dimension
-        climatology = baseline.groupby("time.month").mean("time", skipna=True)
+        climatology_dataarray = baseline.groupby("time.month").mean("time", skipna=True)
         # climatology = climatology.squeeze()
-        climatology = climatology[variable]
+        climatology5d = climatology_dataarray[variable]
+        climatology4d = climatology5d.mean(dim='depth', skipna=True)
         da4d = dataset[variable]
-        climatology.to_netcdf(f"climatology_{self.dataset}_{self.min_latitude}_{self.min_longitude}_{self.variable}.nc")
+        climatology4d.to_netcdf(f"climatology_{self.dataset}_{self.min_latitude}_{self.min_longitude}_{self.variable}.nc")
 
-        return da4d, climatology
-
+        return da4d, climatology4d
     def __get_year(self):
         return self.starting_time.split("/")[-1]
 
     def __compute_da1d(self, da4d):
         
-        da3d = da4d.isel(depth=0, drop=True)
-        da1d = da3d.mean(dim=('latitude','longitude'))
+        da1d = da4d.mean(dim=('latitude','longitude'))
         da1d['time'] = da1d['time'].dt.dayofyear
         daily_days = np.arange(1, 367)
         da1d = da1d.interp(coords={"time": daily_days})
@@ -84,7 +83,7 @@ class AnomaliesCalculation:
         return [threshold_value], threshold_array
 
     #TODO modify percentile
-    def POT(self, X, q=0.01, t=None, t_pct=95/100):
+    def POT(self, X, q=0.01, t=None, t_pct=90/100):
         """
         Peaks-Over-Threshold value estimator
 
