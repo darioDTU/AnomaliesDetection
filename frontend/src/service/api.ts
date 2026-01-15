@@ -5,8 +5,11 @@ export const BASE_URL = '/api';
 
 export interface PipelineRequest {
   dataset: string;
+  latitude: number;
+  longitude: number;
   starting_time: string;
   variable: string;
+  depth: number;
 }
 
 export const fetchData = async (endpoint: string) => {

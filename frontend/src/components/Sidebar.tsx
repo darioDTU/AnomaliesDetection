@@ -8,6 +8,8 @@ interface SidebarProps {
   selectedVariable: string;
   setSelectedVariable: (variable: string) => void;
   variableList: string[];
+  depth: number;
+  setDepth: (depth: number) => void;
   startTime: string;
   setStartTime: (time: string) => void;
   selectedAlgorithm: string;
@@ -21,11 +23,20 @@ const Sidebar: React.FC<SidebarProps> = ({
   dbList,
   selectedVariable, setSelectedVariable,
   variableList,
+  depth, setDepth,
   startTime, setStartTime,
   selectedAlgorithm, setSelectedAlgorithm,
   algorithmList,
   availableYears
-}) => (
+}) => {
+  const depthOptions: Array<{ value: number; label: string }> = [
+    { value: 0, label: '0 - 50' },
+    { value: 50, label: '50 - 100' },
+    { value: 100, label: '100 - 150' },
+    { value: 150, label: '150 - 200' },
+  ];
+
+  return (
   <aside className="sidebar">
     <div className="sidebar-section sidebar-dashboard">
       <div>
@@ -56,6 +67,22 @@ const Sidebar: React.FC<SidebarProps> = ({
       </label>
     </div>
     <div className="sidebar-section">
+      <h3>Depth</h3>
+      <label>
+        Choose Depth Range:
+        <select
+          value={depth}
+          onChange={e => setDepth(Number(e.target.value))}
+        >
+          {depthOptions.map(opt => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+    <div className="sidebar-section">
       <h3>Algorithm</h3>
       <label>
         Choose Algorithm:
@@ -76,6 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     </div>
     {/* Add regions section if needed */}
   </aside>
-)
+  )
+}
 
 export default Sidebar

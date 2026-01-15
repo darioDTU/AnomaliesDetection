@@ -71,6 +71,7 @@ class PipelineParams(BaseModel):
     longitude: float
     starting_time: str
     variable : str
+    depth: float
 
 app = FastAPI(root_path="/api")
 
@@ -108,6 +109,8 @@ async def run_pipeline_pot(params : PipelineParams):
     max_latitude = min_latitude + 5
     min_longitude = params.longitude
     max_longitude = min_longitude + 5
+    min_depth = params.depth
+    max_depth = min_depth + 50
 
     anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
 
@@ -119,7 +122,9 @@ async def run_pipeline_pot(params : PipelineParams):
                                         minimum_latitude=min_latitude,
                                         maximum_latitude=max_latitude,
                                         minimum_longitude=min_longitude,
-                                        maximum_longitude=max_longitude)
+                                        maximum_longitude=max_longitude,
+                                        minimum_depth=min_depth,   
+                                        maximum_depth=max_depth)
 
     climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
     if not os.path.exists(climatology_path):
@@ -136,12 +141,15 @@ async def run_pipeline_pot(params : PipelineParams):
             maximum_latitude=max_latitude,
             minimum_longitude=min_longitude,
             maximum_longitude=max_longitude,
+            minimum_depth=min_depth,
+            maximum_depth=max_depth,
             climatology=True
         )
         anomalies_class.ClimatologyCalculation(baseline, output, variable)
 
     climatology = xr.open_dataarray(climatology_path)
-    da4d = output[variable]
+    da5d = output[variable]
+    da4d = da5d.mean('depth', skipna=True)
     threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)
     anomalies_class.showGraphPOT(da4d, threshold_array, climatology, variable_name)
     return {"Status": "ok", 
@@ -159,6 +167,8 @@ async def run_pipeline_classic(params : PipelineParams):
     max_latitude = min_latitude + 5
     min_longitude = params.longitude
     max_longitude = min_longitude + 5
+    min_depth = params.depth
+    max_depth = min_depth + 50
     
     anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
 
@@ -170,7 +180,9 @@ async def run_pipeline_classic(params : PipelineParams):
                                         minimum_latitude=min_latitude,
                                         maximum_latitude=max_latitude,
                                         minimum_longitude=min_longitude,
-                                        maximum_longitude=max_longitude)
+                                        maximum_longitude=max_longitude,
+                                        minimum_depth=min_depth,
+                                        maximum_depth=max_depth)
     
     climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
     if not os.path.exists(climatology_path):
@@ -187,12 +199,15 @@ async def run_pipeline_classic(params : PipelineParams):
             maximum_latitude=max_latitude,
             minimum_longitude=min_longitude,
             maximum_longitude=max_longitude,
+            minimum_depth=min_depth,
+            maximum_depth=max_depth,
             climatology=True
         )
         anomalies_class.ClimatologyCalculation(baseline, output, variable)
         
     climatology = xr.open_dataarray(climatology_path)
-    da4d = output[variable]
+    da5d = output[variable]
+    da4d = da5d.mean('depth', skipna=True)
     threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
     anomalies_class.showGraph(da4d, threshold_array, threshold_value, variable_name)
     return {"Status": "ok", 
@@ -234,11 +249,18 @@ async def get_stats():
 # ShowPixelAnomalies(mask, 0)
 # ShowGraphAnomalyv2(da6d, mask, threshold, 0, user_lon = 30, user_lat = 25)
 
-# dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m'
+# dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1M-m'
 # starting_time = '01/01/2023'
-# output = CopernicusFetcher().fetch_temperature(dataset, starting_time)
-# climatology = xr.open_dataarray("backend/climatology_cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m_0.0_-6.0_thetao.nc")
-# print(climatology)
-# da4d = output['thetao']
+# ending_time = '31/12/2023'
+# variable = 'thetao'
+# min_latitude = -35
+# max_latitude = -30
+# min_longitude = 55
+# max_longitude = 60
+# output = CopernicusFetcher().fetch_temperature(dataset, starting_time, ending_time, variable, min_latitude, max_latitude, min_longitude, max_longitude)
+# # climatology = xr.open_dataarray("backend/climatology_cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m_0.0_-6.0_thetao.nc")
+# # print(climatology)
+# da5d = output['thetao']
+# da4d = da5d.mean('depth', skipna = True)
 # threshold = ProcessAnomalies(da4d, climatology, 0)
 # showGraph(da4d, threshold)
