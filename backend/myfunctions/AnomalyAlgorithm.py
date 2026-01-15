@@ -247,8 +247,7 @@ class AnomaliesCalculation:
         
         da1d = self.__compute_da1d(da4d)
 
-        threshold3d = threshold.isel(depth=0, drop=True)        
-        threshold = threshold3d.mean(dim=('latitude','longitude'))
+        threshold = threshold.mean(dim=('latitude','longitude'))
         threshold_extended = self.__compute_variable(threshold)
         threshold_value = np.array(threshold_value)
         climatology = threshold_extended - threshold_value
@@ -275,8 +274,7 @@ class AnomaliesCalculation:
         
         da1d = self.__compute_da1d(da4d)
         
-        climatology3d = climatology4d.isel(depth=0, drop=True)
-        climatology1d = climatology3d.mean(dim=('latitude','longitude'))
+        climatology1d = climatology4d.mean(dim=('latitude','longitude'))
         
         threshold_extended = self.__compute_variable(threshold)
         climatology = self.__compute_variable(climatology1d)
