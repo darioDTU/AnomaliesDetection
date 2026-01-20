@@ -8,6 +8,8 @@ interface SidebarProps {
   selectedVariable: string;
   setSelectedVariable: (variable: string) => void;
   variableList: string[];
+  depth: number;
+  setDepth: (depth: number) => void;
   startTime: string;
   setStartTime: (time: string) => void;
   selectedAlgorithm: string;
@@ -25,11 +27,19 @@ const Sidebar: React.FC<SidebarProps> = ({
   selectedAlgorithm, setSelectedAlgorithm,
   algorithmList,
   availableYears
-}) => (
+}) => {
+  return (
   <aside className="sidebar">
+    
+      <img
+        className="sidebar-logo"
+        src="/branding/logo.png"
+        alt="OceanICU logo"
+      />
+    
     <div className="sidebar-section sidebar-dashboard">
       <div>
-        <h2>Anomalies Detection</h2>
+        <h2> Anomaly Detection </h2>
       </div>
     </div>
     <div className="sidebar-section">
@@ -76,6 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     </div>
     {/* Add regions section if needed */}
   </aside>
-)
+  )
+}
 
 export default Sidebar
