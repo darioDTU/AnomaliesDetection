@@ -8,8 +8,6 @@ interface SidebarProps {
   selectedVariable: string;
   setSelectedVariable: (variable: string) => void;
   variableList: string[];
-  depth: number;
-  setDepth: (depth: number) => void;
   startTime: string;
   setStartTime: (time: string) => void;
   selectedAlgorithm: string;
