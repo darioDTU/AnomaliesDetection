@@ -26,29 +26,32 @@ class AnomaliesCalculation:
         self.dataset = dataset
         self.percentile = percentile
         self.variable = variable
-    def ClimatologyCalculation(self, baseline, dataset, variable):
+    def ClimatologyCalculation(self, baseline, dataset, variable) -> None:
         # compute the mean across the 'time' dimension
         climatology = baseline.groupby("time.month").mean("time", skipna=True)
         # climatology = climatology.squeeze()
         climatology = climatology[variable]
-        da4d = dataset[variable]
         climatology.to_netcdf(f"climatology_{self.dataset}_{self.min_latitude}_{self.min_longitude}_{self.variable}.nc")
-
-        return da4d, climatology
 
     def __get_year(self):
         return self.starting_time.split("/")[-1]
 
+    def __compute_variable1d(self, variable4d):
+
+        variable3d = variable4d.mean(dim='depth', skipna=True)
+        variable1d = variable3d.mean(dim=('latitude','longitude'))
+
+        return variable1d
+
     def __compute_da1d(self, da4d):
         
-        da3d = da4d.isel(depth=0, drop=True)
-        da1d = da3d.mean(dim=('latitude','longitude'))
+        da1d = self.__compute_variable1d(da4d)
         da1d['time'] = da1d['time'].dt.dayofyear
         daily_days = np.arange(1, 367)
         da1d = da1d.interp(coords={"time": daily_days})
         
         return da1d
-    def __compute_variable(self, variable1d):
+    def __interpolate_variable(self, variable1d):
         
         daily_days = np.arange(1, 367)
         mid_month_day = [15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349]
@@ -84,7 +87,7 @@ class AnomaliesCalculation:
         return [threshold_value], threshold_array
 
     #TODO modify percentile
-    def POT(self, X, q=0.01, t=None, t_pct=95/100):
+    def POT(self, X, q=0.01, t=None, t_pct=90/100):
         """
         Peaks-Over-Threshold value estimator
 
@@ -247,10 +250,10 @@ class AnomaliesCalculation:
         plt.clf()
         
         da1d = self.__compute_da1d(da4d)
+        threshold1d = self.__compute_variable1d(threshold)
 
-        threshold3d = threshold.isel(depth=0, drop=True)        
-        threshold = threshold3d.mean(dim=('latitude','longitude'))
-        threshold_extended = self.__compute_variable(threshold)
+        threshold = threshold.mean(dim=('latitude','longitude'))
+        threshold_extended = self.__interpolate_variable(threshold1d)
         threshold_value = np.array(threshold_value)
         climatology = threshold_extended - threshold_value
                                
@@ -276,11 +279,10 @@ class AnomaliesCalculation:
         
         da1d = self.__compute_da1d(da4d)
         
-        climatology3d = climatology4d.isel(depth=0, drop=True)
-        climatology1d = climatology3d.mean(dim=('latitude','longitude'))
+        climatology1d = self.__compute_variable1d(climatology4d)
         
-        threshold_extended = self.__compute_variable(threshold)
-        climatology = self.__compute_variable(climatology1d)
+        threshold_extended = self.__interpolate_variable(threshold)
+        climatology = self.__interpolate_variable(climatology1d)
                                
         da1d.to_netcdf("results/da1d.nc")
         threshold_extended.to_netcdf("results/threshold.nc")

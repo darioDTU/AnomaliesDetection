@@ -7,27 +7,20 @@ import { dbVariables, dbYears } from './service/dbVariables.ts'
 import FloatingSidebar from './components/FloatingSidebar.tsx'
 import Map from './components/Map.tsx'
 import Sidebar from './components/Sidebar.tsx';
-import { fetchData, postData } from './service/api.ts'
+import { fetchData, postData, type PipelineRequest } from './service/api.ts'
 import { useState, useEffect } from 'react'
 
 import ErrorModalWindow from './components/ErrorModalWindow.tsx'
 import ModalWindow from './components/ModalWindow.tsx'
 
-export type PipelineRequest = {
-  dataset: string;
-  latitude: number;
-  longitude: number;
-  starting_time: string;
-  variable: string;
-};
-
 function App() {
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
-  const [selectedDb, setSelectedDb] = useState('cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m');
-  const [selectedVariable, setSelectedVariable] = useState('thetao');
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState('Classic');
-  const [startTime, setStartTime] = useState(
+  const [depth, setDepth] = useState<number>(0);
+  const [latitude, setLatitude] = useState<number>(0);
+  const [longitude, setLongitude] = useState<number>(0);
+  const [selectedDb, setSelectedDb] = useState<string>('cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m');
+  const [selectedVariable, setSelectedVariable] = useState<string>('thetao');
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('Classic');
+  const [startTime, setStartTime] = useState<string>(
     (dbYears[selectedDb] && dbYears[selectedDb][0]) || ""
   );
   const dbList = ['cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m', 'cmems_mod_glo_phy_my_0.083deg_P1D-m', 'cmems_mod_glo_bgc_my_0.25deg_P1D-m'];
@@ -36,19 +29,20 @@ function App() {
 
   const [, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [stats, setStats] = useState<any>(null);
 
-  const [hasPressButton, setHasPressButton] = useState(false);
+  const [hasPressButton, setHasPressButton] = useState<boolean>(false);
   const paramsReady = Boolean(
 		latitude !== null && longitude !== null && selectedDb && startTime && selectedVariable
 	)
-  const requestBody : PipelineRequest = {
+   const requestBody: PipelineRequest = {
     dataset: selectedDb,
     latitude: latitude,
     longitude: longitude,
     starting_time: startTime,
-    variable: selectedVariable
+    variable: selectedVariable,
+    depth: depth
   };
   const handleApiCall = async () => {
     if (!paramsReady) return;
@@ -82,7 +76,7 @@ function App() {
     }
   };
 
-  const RECT_RESOLUTION = 2;
+  const RECT_RESOLUTION: number = 2;
   const halfRes = RECT_RESOLUTION / 2;
 
   const rectangleBounds: [number, number][] = [
@@ -117,6 +111,7 @@ function App() {
         <aside className="sidebar">
           <Sidebar
             selectedDb={selectedDb}
+            depth={depth}
             startTime={startTime}
             selectedVariable={selectedVariable}
             selectedAlgorithm={selectedAlgorithm}
@@ -124,6 +119,7 @@ function App() {
             setStartTime={setStartTime}
             setSelectedVariable={setSelectedVariable}
             setSelectedAlgorithm={setSelectedAlgorithm}
+            setDepth={setDepth}
             dbList={dbList}
             variableList={variableList}
             algorithmList={algorithmList}
