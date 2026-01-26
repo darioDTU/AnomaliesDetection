@@ -73,7 +73,6 @@ class AnomaliesCalculation:
         # data = data.to_array(dim='var')
         data_grouped = da4d.groupby("time.month").mean()
         deviation = data_grouped - climatology
-        # deviation = clim0 #TODO put deviation here if there are multiple years
         vals = deviation.load()  
         vals_array = abs(vals.data)
         valid = vals_array[np.isfinite(vals_array)]
@@ -186,10 +185,10 @@ class AnomaliesCalculation:
 
         return anomalies, zq, t
 
-    def ProcessAnomalies(self, da6d, climatology, res):
+    def ProcessAnomalies(self, da4d, climatology, res):
         
         if res == 0:
-            threshold_value, threshold_array = self.AnomalyDetection(da6d, climatology)
+            threshold_value, threshold_array = self.AnomalyDetection(da4d, climatology)
 
         elif res == 1:
             # climatology = climatology.to_array(dim='var')

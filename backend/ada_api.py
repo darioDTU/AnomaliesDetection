@@ -137,8 +137,7 @@ async def run_pipeline_pot(params : PipelineParams):
         anomalies_class.ClimatologyCalculation(baseline, output, variable)
 
     climatology = xr.open_dataarray(climatology_path)
-    da5d = output[variable]
-    da4d = da5d.mean('depth', skipna=True)
+    da4d = output[variable]
     threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)
     anomalies_class.showGraphPOT(da4d, threshold_array, climatology, variable_name)
     return {"Status": "ok", 
@@ -186,8 +185,7 @@ async def run_pipeline_classic(params : PipelineParams):
         anomalies_class.ClimatologyCalculation(baseline, output, variable)
         
     climatology = xr.open_dataarray(climatology_path)
-    da5d = output[variable]
-    da4d = da5d.mean('depth', skipna=True)
+    da4d = output[variable]
     threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
     anomalies_class.showGraph(da4d, threshold_array, threshold_value, variable_name)
     return {"Status": "ok", 
