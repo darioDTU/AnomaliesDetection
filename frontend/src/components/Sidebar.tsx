@@ -30,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   availableYears
 }) => {
   const depthOptions: Array<{ value: number; label: string }> = [
+    {value: -1, label: 'Surface'},
     { value: 0, label: '0 - 50' },
     { value: 50, label: '50 - 100' },
     { value: 100, label: '100 - 150' },
