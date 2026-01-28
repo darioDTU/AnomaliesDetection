@@ -59,7 +59,8 @@ class APIHelper:
     
     def load_job_file(self, suffix: str) -> xr.DataArray:
         
-        path = f"{suffix}"
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(backend_dir, suffix)
         if not os.path.exists(path):
             raise HTTPException(status_code=404, detail=f"File {suffix} not found.")
         print('loading file', path)

@@ -45,7 +45,7 @@ class CopernicusFetcher:
 
         '''Set superficial depth for climatology data fetching.'''
 
-        superficial_depth = 0.49
+        superficial_depth = 0.49402499198913574
         self.maximum_depth = superficial_depth
         self.minimum_depth = superficial_depth
 
