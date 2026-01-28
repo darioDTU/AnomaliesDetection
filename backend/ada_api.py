@@ -146,51 +146,54 @@ async def run_pipeline_pot(params : PipelineParams):
     
 @app.post("/run_pipeline_anomalies/classic")
 async def run_pipeline_classic(params : PipelineParams):
-    
-    dataset = params.dataset
-    starting_time = f"01/01/{params.starting_time}"
-    ending_time = f"31/12/{params.starting_time}"
-    variable = params.variable.split('-')[0]
-    variable_name = params.variable.split('-')[-1]
-    min_latitude = params.latitude
-    max_latitude = min_latitude + 5
-    min_longitude = params.longitude
-    max_longitude = min_longitude + 5
-    min_depth = params.depth
-    max_depth = min_depth + 50
-    
-    anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
-
-    copernicus_fetcher = CopernicusFetcher(
-        dataset_id=dataset,
-        starting_time=starting_time,
-        ending_time=ending_time,
-        variable=variable,
-        minimum_longitude=min_longitude,
-        maximum_longitude=max_longitude,
-        minimum_latitude=min_latitude,
-        maximum_latitude=max_latitude,
-        minimum_depth=min_depth,
-        maximum_depth=max_depth
-    )
-    output = copernicus_fetcher.fetch_temperature()
-    
-    climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
-    if not os.path.exists(climatology_path):
-        if app.state.db_path != None:
-            os.remove(app.state.db_path)
+    try:
+        dataset = params.dataset
+        starting_time = f"01/01/{params.starting_time}"
+        ending_time = f"31/12/{params.starting_time}"
+        variable = params.variable.split('-')[0]
+        variable_name = params.variable.split('-')[-1]
+        min_latitude = params.latitude
+        max_latitude = min_latitude + 5
+        min_longitude = params.longitude
+        max_longitude = min_longitude + 5
+        min_depth = params.depth
+        max_depth = min_depth + 50
         
-        app.state.db_path = climatology_path
-        baseline = copernicus_fetcher.fetch_temperature(climatology=True)
+        anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
 
-        anomalies_class.ClimatologyCalculation(baseline, output, variable)
+        copernicus_fetcher = CopernicusFetcher(
+            dataset_id=dataset,
+            starting_time=starting_time,
+            ending_time=ending_time,
+            variable=variable,
+            minimum_longitude=min_longitude,
+            maximum_longitude=max_longitude,
+            minimum_latitude=min_latitude,
+            maximum_latitude=max_latitude,
+            minimum_depth=min_depth,
+            maximum_depth=max_depth
+        )
+        output = copernicus_fetcher.fetch_temperature()
         
-    climatology = xr.open_dataarray(climatology_path)
-    da4d = output[variable]
-    threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
-    anomalies_class.showGraph(da4d, threshold_array, threshold_value, variable_name)
-    return {"Status": "ok", 
-            "Threshold Value": threshold_value}
+        climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
+        if not os.path.exists(climatology_path):
+            if app.state.db_path is not None:
+                os.remove(app.state.db_path)
+            
+            app.state.db_path = climatology_path
+            baseline = copernicus_fetcher.fetch_temperature(climatology=True)
+
+            anomalies_class.ClimatologyCalculation(baseline, output, variable)
+            
+        climatology = xr.open_dataarray(climatology_path)
+        da4d = output[variable]
+        threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
+        anomalies_class.showGraph(da4d, threshold_array, threshold_value, variable_name)
+        return {"Status": "ok", 
+                "Threshold Value": threshold_value}
+    except Exception as e:
+        print(f"Error in run_pipeline_classic: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Pipeline execution failed: {str(e)}")
 
 @app.get("/show_image")
 async def show_image():
