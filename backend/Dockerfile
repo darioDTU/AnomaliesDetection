@@ -18,6 +18,6 @@ RUN pip install "xarray==2023.12.0" "zarr<3"
 COPY . /app
 
 # Make an empty 'results' folder in the container
-RUN mkdir -p /app/backend/results
+RUN mkdir -p /app/results
 
 CMD ["uvicorn", "ada_api:app", "--host", "0.0.0.0", "--port", "80"]
