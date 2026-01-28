@@ -197,7 +197,14 @@ async def run_pipeline_classic(params : PipelineParams):
 
 @app.get("/show_image")
 async def show_image():
-    return FileResponse("results/plot.png", media_type="image/png")
+    try:
+        if not os.path.exists("results/plot.png"):
+            raise HTTPException(status_code=404, detail="Plot image not found.")
+        
+        return FileResponse("results/plot.png", media_type="image/png")
+    except Exception as e:
+        print(f'Error in show_image: {e}')
+        raise HTTPException(status_code=500, detail=f"Error retrieving image: {str(e)}")
 
 @app.get("/get_stats")
 async def get_stats():
