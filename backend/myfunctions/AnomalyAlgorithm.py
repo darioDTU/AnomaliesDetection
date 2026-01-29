@@ -26,7 +26,7 @@ class AnomaliesCalculation:
         self.dataset = dataset
         self.percentile = percentile
         self.variable = variable
-    def ClimatologyCalculation(self, baseline, dataset, variable) -> None:
+    def ClimatologyCalculation(self, baseline, variable) -> None:
         # compute the mean across the 'time' dimension
         climatology = baseline.groupby("time.month").mean("time", skipna=True)
         # climatology = climatology.squeeze()

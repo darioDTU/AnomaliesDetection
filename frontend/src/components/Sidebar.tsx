@@ -39,9 +39,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
   <aside className="sidebar">
+    
+      <img
+        className="sidebar-logo"
+        src="/branding/logo.png"
+        alt="OceanICU logo"
+      />
+    
     <div className="sidebar-section sidebar-dashboard">
       <div>
-        <h2>Anomalies Detection</h2>
+        <h2>Anomaly Detection</h2>
       </div>
     </div>
     <div className="sidebar-section">
