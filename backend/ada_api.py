@@ -136,7 +136,7 @@ async def run_pipeline_pot(params : PipelineParams):
         
         app.state.db_path = climatology_path
         baseline = copernicus_fetcher.fetch_temperature(climatology=True)
-        anomalies_class.ClimatologyCalculation(baseline, output, variable)
+        anomalies_class.ClimatologyCalculation(baseline, variable)
 
     climatology = xr.open_dataarray(climatology_path)
     da4d = output[variable]
@@ -185,7 +185,7 @@ async def run_pipeline_classic(params : PipelineParams):
             app.state.db_path = climatology_path
             baseline = copernicus_fetcher.fetch_temperature(climatology=True)
 
-            anomalies_class.ClimatologyCalculation(baseline, output, variable)
+            anomalies_class.ClimatologyCalculation(baseline, variable)
             
         climatology = xr.open_dataarray(climatology_path)
         da4d = output[variable]
