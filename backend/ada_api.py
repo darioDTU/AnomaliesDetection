@@ -128,9 +128,10 @@ async def run_pipeline_pot(params : PipelineParams):
     )
     output = copernicus_fetcher.fetch_temperature()
 
-    climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    climatology_path = os.path.join(backend_dir, f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc")
     if not os.path.exists(climatology_path):
-        if app.state.db_path is not None:
+        if app.state.db_path is not None and os.path.exists(app.state.db_path):
             os.remove(app.state.db_path)
         
         app.state.db_path = climatology_path
@@ -175,9 +176,10 @@ async def run_pipeline_classic(params : PipelineParams):
         )
         output = copernicus_fetcher.fetch_temperature()
         
-        climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        climatology_path = os.path.join(backend_dir, f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc")
         if not os.path.exists(climatology_path):
-            if app.state.db_path is not None:
+            if app.state.db_path is not None and os.path.exists(app.state.db_path):
                 os.remove(app.state.db_path)
             
             app.state.db_path = climatology_path
