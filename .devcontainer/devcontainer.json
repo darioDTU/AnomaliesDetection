@@ -18,6 +18,7 @@
     "mounts": [
 		"source=${localWorkspaceFolder},target=/DTU/AnomaliesDetection,type=bind,consistency=cached"
     ],
-    "forwardPorts": [8000, 5173]
+    "forwardPorts": [8000, 5173],
+    "postCreateCommand": "cd /workspaces/app/frontend && npm install"
 }
 

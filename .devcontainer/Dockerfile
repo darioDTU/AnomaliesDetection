@@ -29,33 +29,19 @@ RUN python -m pip install --no-cache-dir -U pip
 # Optional but recommended: centralize Python deps in requirements.txt
 # Keep your current explicit pins here if you prefer, but requirements.txt scales better.
 
-# Core scientific stack
-RUN pip install --no-cache-dir \
-  numpy==2.1.2 \
-  pandas==2.2.3 \
-  scipy==1.15.3 \
-  matplotlib==3.10.3 \
-  bokeh==3.7.3
+# ---- Python dependencies (from backend Dockerfile) ----
+RUN pip install numpy==2.1.2
+RUN pip install pandas==2.2.3
+RUN pip install matplotlib==3.10.3
+RUN pip install scipy==1.15.3
+RUN pip install bokeh==3.7.3
+RUN pip install argopy==1.2.0
+RUN pip install uvicorn==0.34.3
+RUN pip install fastapi==0.115.12
+RUN pip install fsspec==2025.2.0
+RUN pip install copernicusmarine==2.2.2
+RUN pip install "xarray==2023.12.0" "zarr<3"
+RUN pip install h5py==3.10.0
 
-# xarray + storage backends
-RUN pip install --no-cache-dir \
-  "xarray==2023.12.0" \
-  "zarr<3" \
-  "fsspec==2025.2.0" \
-  netCDF4
-
-# Data sources
-RUN pip install --no-cache-dir \
-  argopy==1.2.0 \
-  copernicusmarine==2.2.2
-
-# Geo libs
-RUN pip install --no-cache-dir \
-  shapely \
-  geopandas \
-  cartopy
-
-# API
-RUN pip install --no-cache-dir \
-  fastapi==0.115.12 \
-  uvicorn==0.34.3
+# Set working directory
+WORKDIR /workspaces/app

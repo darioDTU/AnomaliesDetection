@@ -14,7 +14,7 @@ import ErrorModalWindow from './components/ErrorModalWindow.tsx'
 import ModalWindow from './components/ModalWindow.tsx'
 
 function App() {
-  const [depth, setDepth] = useState<number>(0);
+  const [depth, setDepth] = useState<number>(-1);
   const [latitude, setLatitude] = useState<number>(0);
   const [longitude, setLongitude] = useState<number>(0);
   const [selectedDb, setSelectedDb] = useState<string>('cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m');
