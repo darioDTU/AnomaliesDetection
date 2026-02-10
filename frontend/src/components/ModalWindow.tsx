@@ -44,6 +44,7 @@ const ModalWindow = ({ setHasPressButton, stats, selectedDb }: ModalWindowProps)
               </li>
               ))
               : <li>No statistics available for area with no anomalies</li>}
+            
             </ul>
             <h4>Description</h4>
             <ul>
