@@ -83,9 +83,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           onChange={e => setDepth(Number(e.target.value))}
         >
           {depthOptions.map(opt => (
-            <option key={opt.value} value={opt.value}>
+            opt.value >= 0 ?
+              <option key={opt.value} value={opt.value} disabled>
+                {opt.label} (work in progress)
+              </option>
+            : 
+              <option key={opt.value} value={opt.value}>
               {opt.label}
-            </option>
+              </option>
           ))}
         </select>
       </label>

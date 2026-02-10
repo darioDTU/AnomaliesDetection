@@ -1,0 +1,162 @@
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 1100px;
+  max-height: 90vh;
+  width: 95%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.modal-close:hover {
+  color: #000;
+}
+
+.modal-header {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.error-header {
+  border-bottom: 2px solid #ef4444;
+}
+
+.error-header h2 {
+  color: #ef4444;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.modal-image {
+  flex: 1;
+  min-width: 300px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.modal-stats {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+.modal-stats h4 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: #1f2937;
+  flex-shrink: 0;
+}
+
+.modal-stats ul {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0 0 16px 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.modal-stats ul li {
+  margin-bottom: 8px;
+  padding-left: 0;
+  color: #4b5563;
+}
+
+.modal-stats ul li strong {
+  color: #1f2937;
+}
+
+.modal-description {
+  flex-shrink: 0;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.modal-description h4 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #1f2937;
+}
+
+.modal-description p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.modal-description a {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.modal-description a:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+
+.modal-stats li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #4b5563;
+}
+
+.modal-stats li:last-child {
+  border-bottom: none;
+}
+
+.modal-stats strong {
+  color: #1f2937;
+  font-weight: 600;
+}
