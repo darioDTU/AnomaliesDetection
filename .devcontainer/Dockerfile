@@ -1,7 +1,15 @@
 FROM python:3.12.5-bullseye
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Some networks block plain HTTP (port 80) or are flaky; prefer HTTPS mirrors.
+RUN sed -i \
+    -e 's|http://deb.debian.org|https://deb.debian.org|g' \
+    -e 's|http://security.debian.org|https://security.debian.org|g' \
+    /etc/apt/sources.list
+
 # ---- System dependencies (geo stack + build tooling) ----
-RUN apt-get update \
+RUN apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update \
   && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -19,7 +27,7 @@ RUN apt-get update \
 # Uses NodeSource for a recent Node LTS on Debian bullseye.
 ARG NODE_MAJOR=20
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
-  && apt-get update \
+  && apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update \
   && apt-get install -y --no-install-recommends nodejs \
   && rm -rf /var/lib/apt/lists/*
 

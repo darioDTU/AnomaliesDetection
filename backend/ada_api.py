@@ -4,6 +4,7 @@ import time
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from enum import StrEnum, auto
 from pydantic import BaseModel
 import xarray as xr
 # from dask.distributed import Client
@@ -66,6 +67,48 @@ class APIHelper:
         print('loading file', path)
         return xr.open_dataarray(path)
 
+class VariableEnum(StrEnum):
+    THETAO = auto()
+    CHL = auto()
+    SO = auto()
+    
+class GlobalVariable:
+
+    __physics_clim_path : str
+    __biochem_clim_path : str
+
+    def __init__(
+            self,
+            physics_clim_path : str = "global_clim/climatology_cmems_mod_glo_phy_my_0.083deg_P1M-m_thetao-so_1995-2005_global.nc",
+            biochem_clim_path : str = "global_clim/climatology_cmems_mod_glo_bgc_my_0.25deg_P1D-m_chl_1995-2005_global.nc"):
+        
+        self.__physics_clim_path = physics_clim_path
+        self.__biochem_clim_path = biochem_clim_path
+
+    def __get_physics_clim_path(self) -> str:
+        
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        climatology_path = os.path.join(backend_dir, self.__physics_clim_path)
+
+        return climatology_path
+    def __get_biochem_clim_path(self) -> str:
+        
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        climatology_path = os.path.join(backend_dir, self.__biochem_clim_path)
+
+        return climatology_path
+
+    def get_clim_path(self, variable: VariableEnum) -> str:
+
+        if variable == VariableEnum.THETAO or variable == VariableEnum.SO:
+            return self.__get_physics_clim_path()
+        
+        elif variable == VariableEnum.CHL:
+            return self.__get_biochem_clim_path()
+        
+        else:
+            raise ValueError(f"Unknown variable: {variable}")
+
 class PipelineParams(BaseModel):
     dataset: str
     latitude: float
@@ -113,7 +156,7 @@ async def run_pipeline_pot(params : PipelineParams):
     min_depth = params.depth
     max_depth = min_depth + 50
 
-    anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
+    anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time, 95)
     copernicus_fetcher = CopernicusFetcher(
         dataset_id=dataset,
         starting_time=starting_time,
@@ -128,17 +171,8 @@ async def run_pipeline_pot(params : PipelineParams):
     )
     output = copernicus_fetcher.fetch_temperature()
 
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    climatology_path = os.path.join(backend_dir, f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc")
-    if not os.path.exists(climatology_path):
-        if app.state.db_path is not None and os.path.exists(app.state.db_path):
-            os.remove(app.state.db_path)
-        
-        app.state.db_path = climatology_path
-        baseline = copernicus_fetcher.fetch_temperature(climatology=True)
-        anomalies_class.ClimatologyCalculation(baseline, variable)
-
-    climatology = xr.open_dataarray(climatology_path)
+    climatology_path = GlobalVariable().get_clim_path(variable)
+    climatology = xr.open_dataset(climatology_path)
     da4d = output[variable]
     threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)
     anomalies_class.showGraphPOT(da4d, threshold_array, climatology, variable_name)
@@ -160,7 +194,7 @@ async def run_pipeline_classic(params : PipelineParams):
         min_depth = params.depth
         max_depth = min_depth + 50
         
-        anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
+        anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time, 95)
 
         copernicus_fetcher = CopernicusFetcher(
             dataset_id=dataset,
@@ -176,18 +210,8 @@ async def run_pipeline_classic(params : PipelineParams):
         )
         output = copernicus_fetcher.fetch_temperature()
         
-        backend_dir = os.path.dirname(os.path.abspath(__file__))
-        climatology_path = os.path.join(backend_dir, f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc")
-        if not os.path.exists(climatology_path):
-            if app.state.db_path is not None and os.path.exists(app.state.db_path):
-                os.remove(app.state.db_path)
-            
-            app.state.db_path = climatology_path
-            baseline = copernicus_fetcher.fetch_temperature(climatology=True)
-
-            anomalies_class.ClimatologyCalculation(baseline, variable)
-            
-        climatology = xr.open_dataarray(climatology_path)
+        climatology_path = GlobalVariable().get_clim_path(variable)        
+        climatology = xr.open_dataset(climatology_path)
         da4d = output[variable]
         threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
         anomalies_class.showGraph(da4d, threshold_array, threshold_value, variable_name)
@@ -262,7 +286,8 @@ async def get_stats():
 
 # #     anomalies_class.ClimatologyCalculation(baseline, output, variable)
     
-# climatology = xr.open_dataarray(f"backend/climatology_cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m_0.0_0.0_thetao.nc")
+climatology = xr.open_dataset(f"backend/global_clim/climatology_cmems_mod_glo_phy_my_0.083deg_P1M-m_thetao-so_1995-2005_global.nc")
+print("hereeee")
 
 # da4d = output[variable]
 # threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)

@@ -15,17 +15,14 @@ class AnomaliesCalculation:
     min_latitude : float
     min_longitude : float
     starting_time : str
-    dataset : str
     percentile : int
-    variable : str
 
-    def __init__(self, min_latitude: float, min_longitude: float, starting_time : str,dataset: str, percentile : int, variable: str) -> None:
+    def __init__(self, min_latitude: float, min_longitude: float, starting_time : str, percentile : int) -> None:
         self.min_latitude = min_latitude
         self.min_longitude = min_longitude
         self.starting_time = starting_time
-        self.dataset = dataset
         self.percentile = percentile
-        self.variable = variable
+        
     def ClimatologyCalculation(self, baseline, variable) -> None:
         # compute the mean across the 'time' dimension
         climatology = baseline.groupby("time.month").mean("time", skipna=True)
