@@ -151,7 +151,7 @@ function App() {
       </div>
 
       {!loading && hasPressButton && error == null && stats !== null && (
-        <ModalWindow setHasPressButton={setHasPressButton} stats={stats} />
+        <ModalWindow setHasPressButton={setHasPressButton} stats={stats} selectedDb={selectedDb} />
       )}
 
       {error && hasPressButton && (
