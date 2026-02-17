@@ -23,13 +23,13 @@ class AnomaliesCalculation:
         self.starting_time = starting_time
         self.percentile = percentile
         
-    def ClimatologyCalculation(self, baseline, variable) -> None:
+    def ClimatologyCalculation(self, climatology_global : xr.Dataset, variable) -> xr.DataArray:
         # compute the mean across the 'time' dimension
-        climatology = baseline.groupby("time.month").mean("time", skipna=True)
+        climatology = climatology_global[variable]
+        climatology = climatology.sel(latitude=slice(self.min_latitude, self.min_latitude + 5), longitude=slice(self.min_longitude, self.min_longitude + 5))
         # climatology = climatology.squeeze()
-        climatology = climatology[variable]
-        climatology.to_netcdf(f"climatology_{self.dataset}_{self.min_latitude}_{self.min_longitude}_{self.variable}.nc")
 
+        return climatology
     def __get_year(self):
         return self.starting_time.split("/")[-1]
 

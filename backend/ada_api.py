@@ -1,6 +1,7 @@
 import base64
 import os
 import time
+import traceback
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -172,8 +173,10 @@ async def run_pipeline_pot(params : PipelineParams):
     output = copernicus_fetcher.fetch_temperature()
 
     climatology_path = GlobalVariable().get_clim_path(variable)
-    climatology = xr.open_dataset(climatology_path)
+    climatology_global = xr.open_dataset(climatology_path)
     da4d = output[variable]
+    climatology = anomalies_class.ClimatologyCalculation(climatology_global, variable)
+
     threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)
     anomalies_class.showGraphPOT(da4d, threshold_array, climatology, variable_name)
     return {"Status": "ok", 
@@ -211,13 +214,16 @@ async def run_pipeline_classic(params : PipelineParams):
         output = copernicus_fetcher.fetch_temperature()
         
         climatology_path = GlobalVariable().get_clim_path(variable)        
-        climatology = xr.open_dataset(climatology_path)
+        climatology_global = xr.open_dataset(climatology_path).load()
         da4d = output[variable]
+        climatology = anomalies_class.ClimatologyCalculation(climatology_global, variable) 
+
         threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)
         anomalies_class.showGraph(da4d, threshold_array, threshold_value, variable_name)
         return {"Status": "ok", 
                 "Threshold Value": threshold_value}
     except Exception as e:
+        traceback.print_exc()
         print(f"Error in run_pipeline_classic: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Pipeline execution failed: {str(e)}")
 
@@ -252,48 +258,35 @@ async def get_stats():
         }
     }
 
-# dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1M-m'
-# starting_time = '01/01/2023'
-# ending_time = '31/12/2023'
-# variable = 'thetao'
-# min_latitude = 0
-# max_latitude = 5
-# min_longitude = 0
-# max_longitude = 5
-# min_depth = 0
-# max_depth= 50
-# copernicus_fetcher = CopernicusFetcher(
-#     dataset_id=dataset,
-#     starting_time=starting_time,
-#     ending_time=ending_time,
-#     variable=variable,
-#     minimum_longitude=min_longitude,
-#     maximum_longitude=max_longitude,
-#     minimum_latitude=min_latitude,
-#     maximum_latitude=max_latitude,
-#     minimum_depth=min_depth,
-#     maximum_depth=max_depth
-# )
-# output = copernicus_fetcher.fetch_temperature()
-# anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time,dataset, 95, variable)
-# climatology_path = f"climatology_{dataset}_{min_latitude}_{min_longitude}_{variable}.nc"
-# # if not os.path.exists(climatology_path):
-# #     if app.state.db_path != None:
-# #         os.remove(app.state.db_path)
-    
-# #     app.state.db_path = climatology_path
-# #     baseline = copernicus_fetcher.fetch_temperature(climatology=True)
-
-# #     anomalies_class.ClimatologyCalculation(baseline, output, variable)
+dataset = 'cmems_mod_glo_phy-thetao_anfc_0.083deg_P1M-m'
+starting_time = '01/01/2023'
+ending_time = '31/12/2023'
+variable = 'thetao'
+min_latitude = 0
+max_latitude = 5
+min_longitude = 0
+max_longitude = 5
+min_depth = 0.49402499198913574
+max_depth= 0.49402499198913574
+copernicus_fetcher = CopernicusFetcher(
+    dataset_id=dataset,
+    starting_time=starting_time,
+    ending_time=ending_time,
+    variable=variable,
+    minimum_longitude=min_longitude,
+    maximum_longitude=max_longitude,
+    minimum_latitude=min_latitude,
+    maximum_latitude=max_latitude,
+    minimum_depth=min_depth,
+    maximum_depth=max_depth
+)
+output = copernicus_fetcher.fetch_temperature()
+anomalies_class = AnomaliesCalculation(min_latitude, min_longitude, starting_time, 95)
     
 climatology = xr.open_dataset(f"backend/global_clim/climatology_cmems_mod_glo_phy_my_0.083deg_P1M-m_thetao-so_1995-2005_global.nc")
-print("hereeee")
+climatology_path = GlobalVariable().get_clim_path(variable)        
+climatology_global = xr.open_dataset(climatology_path).load()
+da4d = output[variable]
+climatology = anomalies_class.ClimatologyCalculation(climatology_global, variable) 
 
-# da4d = output[variable]
-# threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 1)
-# anomalies_class.showGraphPOT(da4d, threshold_array, climatology, variable)
-# print(f'Threshold Value: {threshold_value}')
-# da5d = output['thetao']
-
-# threshold = ProcessAnomalies(da4d, climatology, 0)
-# showGraph(da4d, threshold)
+threshold_value, threshold_array = anomalies_class.ProcessAnomalies(da4d, climatology, 0)

@@ -50,4 +50,3 @@ dist-ssr
 *.sw?
 *.user
 results/
-backend/temp.py
