@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build and push backend image
         run: |
-          docker login --username patrizioDK --password ${{secrets.laptop}} ghcr.io
+          docker login --username patrizioDK --password ${{secrets.AD_GIT}} ghcr.io
           docker build -f backend/Dockerfile backend -t ghcr.io/patriziodk/anomalies_detection_backend:1.0.0
           docker push ghcr.io/patriziodk/anomalies_detection_backend:1.0.0
 
